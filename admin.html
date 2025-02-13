@@ -3,38 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - Set Questions</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Admin Panel - Add Questions</title>
 </head>
 <body>
-    <div class="quiz-container">
-        <h1>Admin Panel</h1>
-        
-        <label for="question-input">Enter your question:</label>
-        <input type="text" id="question-input" placeholder="Type your question here">
+    <h2>Add Quiz Question</h2>
+    <input type="text" id="question" placeholder="Enter question"><br>
+    <input type="text" id="option1" placeholder="Option 1"><br>
+    <input type="text" id="option2" placeholder="Option 2"><br>
+    <input type="text" id="option3" placeholder="Option 3"><br>
+    <input type="text" id="option4" placeholder="Option 4"><br>
+    <button onclick="saveQuestion()">Save Question</button>
 
-        <label for="option1">Option 1:</label>
-        <input type="text" id="option1" placeholder="Enter option 1">
-        
-        <label for="option2">Option 2:</label>
-        <input type="text" id="option2" placeholder="Enter option 2">
-        
-        <label for="option3">Option 3:</label>
-        <input type="text" id="option3" placeholder="Enter option 3">
-        
-        <label for="option4">Option 4:</label>
-        <input type="text" id="option4" placeholder="Enter option 4">
-        
-        <label for="correct-answer">Correct Answer:</label>
-        <input type="text" id="correct-answer" placeholder="Enter the correct answer">
-        
-        <button onclick="addQuestion()">Add Question</button>
-        <button onclick="clearQuestions()">Clear All Questions</button>
-        
-        <h2>Saved Questions</h2>
-        <ul id="question-list"></ul>
-    </div>
+    <script type="module">
+        // 🔹 Import Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-    <script src="admin.js"></script>
+        // 🔹 Firebase Configuration (Replace with your actual Firebase config)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
+            authDomain: "quiz-app-e8d1d.firebaseapp.com",
+            projectId: "quiz-app-e8d1d",
+            storageBucket: "quiz-app-e8d1d.firebasestorage.app",
+            messagingSenderId: "421848385039",
+            appId: "1:421848385039:web:cbb560cf9d839752ce457a"
+            measurementId: "G-MBCSZVWMZP"
+        };
+
+        // 🔹 Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function saveQuestion() {
+            const question = document.getElementById("question").value;
+            const options = [
+                document.getElementById("option1").value,
+                document.getElementById("option2").value,
+                document.getElementById("option3").value,
+                document.getElementById("option4").value
+            ];
+
+            if (question.trim() === "" || options.some(opt => opt.trim() === "")) {
+                alert("Please fill all fields.");
+                return;
+            }
+
+            try {
+                await addDoc(collection(db, "quizQuestions"), {
+                    question,
+                    options
+                });
+                alert("Question Added!");
+            } catch (error) {
+                console.error("Error adding question:", error);
+            }
+        }
+    </script>
 </body>
 </html>

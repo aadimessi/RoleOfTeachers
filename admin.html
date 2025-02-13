@@ -21,13 +21,13 @@
 
         // 🔹 Firebase Configuration (Replace with your actual Firebase config)
         const firebaseConfig = {
-            apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
-            authDomain: "quiz-app-e8d1d.firebaseapp.com",
-            projectId: "quiz-app-e8d1d",
-            storageBucket: "quiz-app-e8d1d.firebasestorage.app",
-            messagingSenderId: "421848385039",
-            appId: "1:421848385039:web:cbb560cf9d839752ce457a"
-            measurementId: "G-MBCSZVWMZP"
+             apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
+             authDomain: "quiz-app-e8d1d.firebaseapp.com",
+             projectId: "quiz-app-e8d1d",
+             storageBucket: "quiz-app-e8d1d.firebasestorage.app",
+             messagingSenderId: "421848385039",
+             appId: "1:421848385039:web:cbb560cf9d839752ce457a",
+             measurementId: "G-MBCSZVWMZP"
         };
 
         // 🔹 Initialize Firebase
@@ -35,25 +35,31 @@
         const db = getFirestore(app);
 
         async function saveQuestion() {
-            const question = document.getElementById("question").value;
-            const options = [
-                document.getElementById("option1").value,
-                document.getElementById("option2").value,
-                document.getElementById("option3").value,
-                document.getElementById("option4").value
+            const questionInput = document.getElementById("question");
+            const optionsInputs = [
+                document.getElementById("option1"),
+                document.getElementById("option2"),
+                document.getElementById("option3"),
+                document.getElementById("option4")
             ];
 
-            if (question.trim() === "" || options.some(opt => opt.trim() === "")) {
+            const question = questionInput.value.trim();
+            const options = optionsInputs.map(input => input.value.trim());
+
+            if (question === "" || options.some(opt => opt === "")) {
                 alert("Please fill all fields.");
                 return;
             }
 
             try {
-                await addDoc(collection(db, "quizQuestions"), {
-                    question,
-                    options
-                });
+                await addDoc(collection(db, "quizQuestions"), { question, options });
+
+                // 🔹 Show success message
                 alert("Question Added!");
+
+                // 🔹 Clear input fields for next question
+                questionInput.value = "";
+                optionsInputs.forEach(input => (input.value = ""));
             } catch (error) {
                 console.error("Error adding question:", error);
             }

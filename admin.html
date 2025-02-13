@@ -35,7 +35,7 @@
         const db = getFirestore(app);
 
         async function saveQuestion() {
-            console.log("Saving question...");
+            console.log("🟢 saveQuestion() called");
 
             const questionInput = document.getElementById("question");
             const option1 = document.getElementById("option1");
@@ -51,27 +51,30 @@
                 option4.value.trim()
             ];
 
+            // 🔹 Ensure all fields are filled
             if (question === "" || options.some(opt => opt === "")) {
                 alert("Please fill all fields.");
-                console.warn("Fields are empty.");
+                console.warn("⚠️ Fields are empty. Question not saved.");
                 return;
             }
 
             try {
+                console.log("🟡 Adding question to Firebase...");
                 await addDoc(collection(db, "quizQuestions"), { question, options });
+                console.log("✅ Question added successfully!");
 
-                alert("Question Added!");
+                alert("✅ Question Added!");
 
-                // 🔹 Clear input fields properly
+                // 🔹 Reset input fields
                 questionInput.value = "";
                 option1.value = "";
                 option2.value = "";
                 option3.value = "";
                 option4.value = "";
 
-                console.log("Fields cleared successfully.");
+                console.log("🟢 Fields cleared successfully.");
             } catch (error) {
-                console.error("Error adding question:", error);
+                console.error("❌ Error adding question:", error);
             }
         }
     </script>

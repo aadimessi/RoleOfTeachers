@@ -35,31 +35,41 @@
         const db = getFirestore(app);
 
         async function saveQuestion() {
+            console.log("Saving question...");
+
             const questionInput = document.getElementById("question");
-            const optionsInputs = [
-                document.getElementById("option1"),
-                document.getElementById("option2"),
-                document.getElementById("option3"),
-                document.getElementById("option4")
-            ];
+            const option1 = document.getElementById("option1");
+            const option2 = document.getElementById("option2");
+            const option3 = document.getElementById("option3");
+            const option4 = document.getElementById("option4");
 
             const question = questionInput.value.trim();
-            const options = optionsInputs.map(input => input.value.trim());
+            const options = [
+                option1.value.trim(),
+                option2.value.trim(),
+                option3.value.trim(),
+                option4.value.trim()
+            ];
 
             if (question === "" || options.some(opt => opt === "")) {
                 alert("Please fill all fields.");
+                console.warn("Fields are empty.");
                 return;
             }
 
             try {
                 await addDoc(collection(db, "quizQuestions"), { question, options });
 
-                // 🔹 Show success message
                 alert("Question Added!");
 
-                // 🔹 Clear input fields for next question
+                // 🔹 Clear input fields properly
                 questionInput.value = "";
-                optionsInputs.forEach(input => (input.value = ""));
+                option1.value = "";
+                option2.value = "";
+                option3.value = "";
+                option4.value = "";
+
+                console.log("Fields cleared successfully.");
             } catch (error) {
                 console.error("Error adding question:", error);
             }

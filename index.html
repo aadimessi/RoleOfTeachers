@@ -3,18 +3,64 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Quiz</title>
-    <link rel="stylesheet" href="styles.css">
+    <title>Quiz App</title>
 </head>
 <body>
-    <div class="quiz-container">
-        <h1>Quiz</h1>
-        <p id="question"></p>
-        <div id="options" class="options-container"></div>
-        <button id="submit" onclick="submitAnswer()">Submit</button>
-        <p id="result"></p>
-    </div>
+    <h2>Quiz Questions</h2>
+    <div id="quizContainer">Loading questions...</div>
 
-    <script src="script.js"></script>
+    <script type="module">
+        // 🔹 Import Firebase
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+        // 🔹 Firebase Configuration (Replace with your actual Firebase config)
+        const firebaseConfig = {
+            apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
+            authDomain: "quiz-app-e8d1d.firebaseapp.com",
+            projectId: "quiz-app-e8d1d",
+            storageBucket: "quiz-app-e8d1d.firebasestorage.app",
+            messagingSenderId: "421848385039",
+            appId: "1:421848385039:web:cbb560cf9d839752ce457a",
+            measurementId: "G-MBCSZVWMZP"
+        };
+
+        // 🔹 Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        async function loadQuestions() {
+            const quizContainer = document.getElementById("quizContainer");
+            quizContainer.innerHTML = ""; // Clear previous content
+
+            try {
+                const querySnapshot = await getDocs(collection(db, "quizQuestions"));
+                if (querySnapshot.empty) {
+                    quizContainer.innerHTML = "<p>No questions available.</p>";
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const questionData = doc.data();
+                    const questionDiv = document.createElement("div");
+                    questionDiv.innerHTML = `<p><strong>${questionData.question}</strong></p>`;
+
+                    questionData.options.forEach((option, index) => {
+                        const button = document.createElement("button");
+                        button.textContent = option;
+                        button.onclick = () => alert(`You selected: ${option}`);
+                        questionDiv.appendChild(button);
+                    });
+
+                    quizContainer.appendChild(questionDiv);
+                });
+            } catch (error) {
+                console.error("Error loading questions:", error);
+            }
+        }
+
+        // 🔹 Load questions when the page loads
+        window.onload = loadQuestions;
+    </script>
 </body>
 </html>

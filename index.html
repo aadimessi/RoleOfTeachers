@@ -10,7 +10,7 @@
             font-weight: bold;
         }
         #quizSection {
-            display: none;
+            display: none; /* Initially hide quiz section */
         }
     </style>
 </head>
@@ -59,19 +59,24 @@
 
             console.log(`🔍 Checking student: ${studentName} (ID: ${studentID})`);
 
-            const studentCollection = collection(db, "students");
-            const q = query(studentCollection, where("id", "==", studentID));
-            const querySnapshot = await getDocs(q);
+            try {
+                const studentCollection = collection(db, "students");
+                const q = query(studentCollection, where("id", "==", studentID), where("name", "==", studentName));
+                const querySnapshot = await getDocs(q);
 
-            if (querySnapshot.empty) {
-                alert("❌ Student not found! You are not authorized to take the quiz.");
-                return;
+                if (querySnapshot.empty) {
+                    alert("❌ Student not found! You are not authorized to take the quiz.");
+                    return;
+                }
+
+                console.log("✅ Student verified! Loading quiz...");
+                document.getElementById("quizSection").style.display = "block"; // Show quiz section
+                document.getElementById("loginBtn").disabled = true;
+                loadQuestions();
+            } catch (error) {
+                console.error("❌ Error checking student:", error);
+                alert("❌ Error verifying student. Please try again.");
             }
-
-            console.log("✅ Student verified! Loading quiz...");
-            document.getElementById("quizSection").style.display = "block";
-            document.getElementById("loginBtn").disabled = true;
-            loadQuestions();
         });
 
         async function loadQuestions() {

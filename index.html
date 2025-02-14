@@ -17,37 +17,45 @@
 
         // 🔹 Firebase Configuration (Replace with your Firebase config)
         const firebaseConfig = {
-             apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
-             authDomain: "quiz-app-e8d1d.firebaseapp.com",
-             projectId: "quiz-app-e8d1d",
-             storageBucket: "quiz-app-e8d1d.firebasestorage.app",
-             messagingSenderId: "421848385039",
-             appId: "1:421848385039:web:cbb560cf9d839752ce457a",
-             measurementId: "G-MBCSZVWMZP"
+            apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
+            authDomain: "quiz-app-e8d1d.firebaseapp.com",
+            projectId: "quiz-app-e8d1d",
+            storageBucket: "quiz-app-e8d1d.firebasestorage.app",
+            messagingSenderId: "421848385039",
+            appId: "1:421848385039:web:cbb560cf9d839752ce457a",
+            measurementId: "G-MBCSZVWMZP"
         };
 
         // 🔹 Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        let questionsData = []; // Store questions for validation
+
         async function loadQuestions() {
             console.log("🟡 Loading questions from Firebase...");
 
             const quizContainer = document.getElementById("quizContainer");
-            quizContainer.innerHTML = ""; // Clear existing content
+            quizContainer.innerHTML = ""; // Clear previous questions
 
             const querySnapshot = await getDocs(collection(db, "quizQuestions"));
-            let questionIndex = 0; // Unique identifier for each question
+            let questionIndex = 0;
 
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
                 const questionText = data.question;
                 const options = data.options;
+                const correctAnswer = data.correctAnswer; // 🔹 Get the correct answer
+
+                questionsData.push({
+                    questionIndex,
+                    correctAnswer
+                });
 
                 const questionDiv = document.createElement("div");
                 questionDiv.innerHTML = `<p><strong>${questionIndex + 1}. ${questionText}</strong></p>`;
 
-                // 🔹 Create unique name for each question group
+                // 🔹 Each question must have a **unique name**
                 const groupName = `question_${questionIndex}`;
 
                 options.forEach((option, optionIndex) => {
@@ -70,23 +78,24 @@
         function submitQuiz() {
             console.log("🟡 Submitting quiz...");
 
-            const quizContainer = document.getElementById("quizContainer");
-            const questionDivs = quizContainer.getElementsByTagName("div");
-
             let correctCount = 0;
-            let totalQuestions = questionDivs.length;
+            let totalQuestions = questionsData.length;
 
-            for (let i = 0; i < totalQuestions; i++) {
-                const selectedOption = document.querySelector(`input[name="question_${i}"]:checked`);
+            questionsData.forEach(({ questionIndex, correctAnswer }) => {
+                const selectedOption = document.querySelector(`input[name="question_${questionIndex}"]:checked`);
 
                 if (selectedOption) {
-                    console.log(`🔹 Question ${i + 1} Answered: ${selectedOption.value}`);
-                } else {
-                    console.warn(`⚠️ Question ${i + 1} NOT Answered!`);
-                }
-            }
+                    console.log(`🔹 Question ${questionIndex + 1}: Selected "${selectedOption.value}"`);
 
-            alert(`✅ Quiz Submitted! Check the console for details.`);
+                    if (selectedOption.value === correctAnswer) {
+                        correctCount++;
+                    }
+                } else {
+                    console.warn(`⚠️ Question ${questionIndex + 1} NOT Answered!`);
+                }
+            });
+
+            alert(`✅ Quiz Submitted!\nYour Score: ${correctCount}/${totalQuestions}`);
         }
 
         loadQuestions();

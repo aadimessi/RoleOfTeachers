@@ -4,20 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz</title>
-    <style>
-        .selected { background-color: lightblue; font-weight: bold; } /* Highlight selected answer */
-    </style>
 </head>
 <body>
-    <h2>Quiz Questions</h2>
-    <div id="quizContainer"></div> <!-- Questions will load here -->
-    <button id="submitBtn">Submit Answers</button>
-    <h3 id="result"></h3> <!-- Score will appear here -->
+    <h2>Quiz</h2>
+    <div id="quizContainer"></div> <!-- Questions will be loaded here -->
+    <button id="submitBtn">Submit</button>
 
     <script type="module">
+        // 🔹 Import Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
+        // 🔹 Firebase Configuration (Same as admin.html)
         const firebaseConfig = {
              apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
              authDomain: "quiz-app-e8d1d.firebaseapp.com",
@@ -28,75 +26,65 @@
              measurementId: "G-MBCSZVWMZP"
         };
 
+        // 🔹 Initialize Firebase
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let quizData = []; // Store fetched questions
-
         async function loadQuestions() {
+            console.log("🟡 Loading questions from Firebase...");
+
+            const quizContainer = document.getElementById("quizContainer");
+            quizContainer.innerHTML = ""; // Clear existing content
+
             const querySnapshot = await getDocs(collection(db, "quizQuestions"));
-            const quizContainer = document.getElementById("quizContainer");
+            let questionIndex = 0; // Track question numbers
 
-            quizData = []; // Reset data to prevent duplication
-            quizContainer.innerHTML = ""; // Clear previous content
-
-            querySnapshot.forEach((doc, index) => {
+            querySnapshot.forEach((doc) => {
                 const data = doc.data();
-                if (!quizData.some(q => q.question === data.question)) { // Prevent duplicates
-                    quizData.push(data);
-                    displayQuestion(index, data);
-                }
-            });
-        }
+                const questionText = data.question;
+                const options = data.options;
 
-        function displayQuestion(index, data) {
-            const quizContainer = document.getElementById("quizContainer");
-            const questionDiv = document.createElement("div");
-            questionDiv.innerHTML = `
-                <p><strong>Q${index + 1}: ${data.question}</strong></p>
-                ${data.options.map((option, i) => `
-                    <label>
-                        <input type="radio" name="question${index}" value="${option}"> 
-                        <span>${option}</span>
-                    </label><br>
-                `).join('')}
-                <hr>
-            `;
-            quizContainer.appendChild(questionDiv);
+                const questionDiv = document.createElement("div");
+                questionDiv.innerHTML = `<p><strong>${questionIndex + 1}. ${questionText}</strong></p>`;
 
-            // Highlight selected answer
-            questionDiv.querySelectorAll("input[type='radio']").forEach(input => {
-                input.addEventListener("change", () => {
-                    questionDiv.querySelectorAll("label").forEach(label => {
-                        label.classList.remove("selected"); // Remove previous highlight
-                    });
-                    input.parentElement.classList.add("selected"); // Highlight selected
+                options.forEach((option, optionIndex) => {
+                    const inputId = `q${questionIndex}_opt${optionIndex}`;
+                    questionDiv.innerHTML += `
+                        <input type="radio" id="${inputId}" name="question${questionIndex}" value="${option}">
+                        <label for="${inputId}">${option}</label><br>
+                    `;
                 });
+
+                quizContainer.appendChild(questionDiv);
+                questionIndex++;
             });
+
+            console.log("✅ Questions loaded successfully!");
         }
 
-        document.getElementById("submitBtn").addEventListener("click", () => {
-            let score = 0;
-            let totalQuestions = quizData.length;
-            let answered = 0;
+        document.getElementById("submitBtn").addEventListener("click", submitQuiz);
+
+        function submitQuiz() {
+            console.log("🟡 Submitting quiz...");
+
+            const quizContainer = document.getElementById("quizContainer");
+            const questionDivs = quizContainer.getElementsByTagName("div");
+
+            let correctCount = 0;
+            let totalQuestions = questionDivs.length;
 
             for (let i = 0; i < totalQuestions; i++) {
                 const selectedOption = document.querySelector(`input[name="question${i}"]:checked`);
+
                 if (selectedOption) {
-                    answered++;
-                    if (selectedOption.value === quizData[i].correctAnswer) { // Check correctness
-                        score++;
-                    }
+                    console.log(`🔹 Question ${i + 1} Answered: ${selectedOption.value}`);
+                } else {
+                    console.warn(`⚠️ Question ${i + 1} NOT Answered!`);
                 }
             }
 
-            if (answered < totalQuestions) {
-                alert("⚠️ Please answer all questions before submitting!");
-                return;
-            }
-
-            document.getElementById("result").innerText = `✅ Your Score: ${score} / ${totalQuestions}`;
-        });
+            alert(`✅ Quiz Submitted! Check the console for details.`);
+        }
 
         loadQuestions();
     </script>

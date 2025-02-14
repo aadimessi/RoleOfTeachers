@@ -63,7 +63,15 @@ function submitAnswer() {
 function showFinalScore() {
     setTimeout(() => {
         alert(`Quiz Completed!\nYour Score: ${score} / ${questions.length}`);
-        window.close(); // 🔹 Closes the quiz page
+        
+        // 🔹 Redirect to another page (optional)
+        window.location.href = "thankyou.html";  
+
+        // 🔹 Force close using browser interaction
+        let userConfirmed = confirm("Click OK to close the page.");
+        if (userConfirmed) {
+            window.open('', '_self').close(); // Attempt to close
+        }
     }, 500);
 }
 

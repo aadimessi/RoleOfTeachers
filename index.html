@@ -15,7 +15,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // 🔹 Firebase Configuration (Same as admin.html)
+        // 🔹 Firebase Configuration (Replace with your Firebase config)
         const firebaseConfig = {
              apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
              authDomain: "quiz-app-e8d1d.firebaseapp.com",
@@ -37,7 +37,7 @@
             quizContainer.innerHTML = ""; // Clear existing content
 
             const querySnapshot = await getDocs(collection(db, "quizQuestions"));
-            let questionIndex = 0; // Track question numbers
+            let questionIndex = 0; // Unique identifier for each question
 
             querySnapshot.forEach((doc) => {
                 const data = doc.data();
@@ -50,7 +50,7 @@
                 options.forEach((option, optionIndex) => {
                     const inputId = `q${questionIndex}_opt${optionIndex}`;
                     questionDiv.innerHTML += `
-                        <input type="radio" id="${inputId}" name="question${questionIndex}" value="${option}">
+                        <input type="radio" id="${inputId}" name="question_${questionIndex}" value="${option}">
                         <label for="${inputId}">${option}</label><br>
                     `;
                 });
@@ -74,7 +74,7 @@
             let totalQuestions = questionDivs.length;
 
             for (let i = 0; i < totalQuestions; i++) {
-                const selectedOption = document.querySelector(`input[name="question${i}"]:checked`);
+                const selectedOption = document.querySelector(`input[name="question_${i}"]:checked`);
 
                 if (selectedOption) {
                     console.log(`🔹 Question ${i + 1} Answered: ${selectedOption.value}`);

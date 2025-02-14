@@ -37,22 +37,31 @@
         const db = getFirestore(app);
 
         let questionsData = []; // Store questions for validation
+        let questionIds = new Set(); // Track unique question IDs
 
         async function loadQuestions() {
             console.log("🟡 Loading questions from Firebase...");
 
             const quizContainer = document.getElementById("quizContainer");
             quizContainer.innerHTML = ""; // Clear previous questions
-            questionsData = []; // 🔹 Reset questionsData to prevent duplicates
+            questionsData = []; // Reset questionsData
+            questionIds.clear(); // Clear previous question tracking
 
             const querySnapshot = await getDocs(collection(db, "quizQuestions"));
-            let questionIndex = 0;
-
+            
             querySnapshot.forEach((doc) => {
+                if (questionIds.has(doc.id)) {
+                    console.warn(`⚠️ Duplicate question detected: ${doc.id}, skipping...`);
+                    return; // Skip duplicate question
+                }
+
                 const data = doc.data();
                 const questionText = data.question;
                 const options = data.options;
                 const correctAnswer = data.correctAnswer; // 🔹 Get the correct answer
+
+                const questionIndex = questionsData.length; // Corrected indexing
+                questionIds.add(doc.id); // Mark question as added
 
                 questionsData.push({
                     questionIndex,
@@ -74,7 +83,6 @@
                 });
 
                 quizContainer.appendChild(questionDiv);
-                questionIndex++;
             });
 
             console.log("✅ Questions loaded successfully!");

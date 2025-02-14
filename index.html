@@ -4,66 +4,98 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz</title>
+    <style>
+        .selected { background-color: lightblue; font-weight: bold; } /* Highlight selected answer */
+    </style>
 </head>
 <body>
     <h2>Quiz Questions</h2>
     <div id="quizContainer"></div> <!-- Questions will load here -->
     <button id="submitBtn">Submit Answers</button>
+    <h3 id="result"></h3> <!-- Score will appear here -->
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
-            authDomain: "quiz-app-e8d1d.firebaseapp.com",
-            projectId: "quiz-app-e8d1d",
-            storageBucket: "quiz-app-e8d1d.firebasestorage.app",
-            messagingSenderId: "421848385039",
-            appId: "1:421848385039:web:cbb560cf9d839752ce457a",
-            measurementId: "G-MBCSZVWMZP"
+             apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
+             authDomain: "quiz-app-e8d1d.firebaseapp.com",
+             projectId: "quiz-app-e8d1d",
+             storageBucket: "quiz-app-e8d1d.firebasestorage.app",
+             messagingSenderId: "421848385039",
+             appId: "1:421848385039:web:cbb560cf9d839752ce457a",
+             measurementId: "G-MBCSZVWMZP"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        let quizData = []; // Store fetched questions
+
         async function loadQuestions() {
             const querySnapshot = await getDocs(collection(db, "quizQuestions"));
             const quizContainer = document.getElementById("quizContainer");
 
+            quizData = []; // Reset data to prevent duplication
             quizContainer.innerHTML = ""; // Clear previous content
 
             querySnapshot.forEach((doc, index) => {
                 const data = doc.data();
-                const questionDiv = document.createElement("div");
-                questionDiv.innerHTML = `
-                    <p><strong>Q${index + 1}: ${data.question}</strong></p>
-                    ${data.options.map((option, i) => `
-                        <label>
-                            <input type="radio" name="question${index}" value="${option}"> ${option}
-                        </label><br>
-                    `).join('')}
-                    <hr>
-                `;
-                quizContainer.appendChild(questionDiv);
+                if (!quizData.some(q => q.question === data.question)) { // Prevent duplicates
+                    quizData.push(data);
+                    displayQuestion(index, data);
+                }
+            });
+        }
+
+        function displayQuestion(index, data) {
+            const quizContainer = document.getElementById("quizContainer");
+            const questionDiv = document.createElement("div");
+            questionDiv.innerHTML = `
+                <p><strong>Q${index + 1}: ${data.question}</strong></p>
+                ${data.options.map((option, i) => `
+                    <label>
+                        <input type="radio" name="question${index}" value="${option}"> 
+                        <span>${option}</span>
+                    </label><br>
+                `).join('')}
+                <hr>
+            `;
+            quizContainer.appendChild(questionDiv);
+
+            // Highlight selected answer
+            questionDiv.querySelectorAll("input[type='radio']").forEach(input => {
+                input.addEventListener("change", () => {
+                    questionDiv.querySelectorAll("label").forEach(label => {
+                        label.classList.remove("selected"); // Remove previous highlight
+                    });
+                    input.parentElement.classList.add("selected"); // Highlight selected
+                });
             });
         }
 
         document.getElementById("submitBtn").addEventListener("click", () => {
-            const selectedAnswers = [];
-            const totalQuestions = document.querySelectorAll("#quizContainer p").length;
+            let score = 0;
+            let totalQuestions = quizData.length;
+            let answered = 0;
 
             for (let i = 0; i < totalQuestions; i++) {
                 const selectedOption = document.querySelector(`input[name="question${i}"]:checked`);
                 if (selectedOption) {
-                    selectedAnswers.push(selectedOption.value);
-                } else {
-                    selectedAnswers.push(null); // No answer selected
+                    answered++;
+                    if (selectedOption.value === quizData[i].correctAnswer) { // Check correctness
+                        score++;
+                    }
                 }
             }
 
-            console.log("📝 Selected Answers:", selectedAnswers);
-            alert("✅ Answers submitted! Check console for details.");
+            if (answered < totalQuestions) {
+                alert("⚠️ Please answer all questions before submitting!");
+                return;
+            }
+
+            document.getElementById("result").innerText = `✅ Your Score: ${score} / ${totalQuestions}`;
         });
 
         loadQuestions();

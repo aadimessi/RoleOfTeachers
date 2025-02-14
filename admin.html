@@ -13,13 +13,12 @@
     <input type="text" id="option3" placeholder="Option 3"><br>
     <input type="text" id="option4" placeholder="Option 4"><br>
     
-    <!-- 🔹 ADDED: Correct Answer Selection -->
     <label>Correct Answer:</label>
     <select id="correctAnswer">
-        <option value="option1">Option 1</option>
-        <option value="option2">Option 2</option>
-        <option value="option3">Option 3</option>
-        <option value="option4">Option 4</option>
+        <option value="0">Option 1</option>
+        <option value="1">Option 2</option>
+        <option value="2">Option 3</option>
+        <option value="3">Option 4</option>
     </select>
     
     <button id="saveBtn">Save Question</button>
@@ -27,9 +26,9 @@
     <script type="module">
         // 🔹 Import Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // 🔹 Firebase Configuration (Replace with your actual Firebase config)
+        // 🔹 Firebase Configuration
         const firebaseConfig = {
              apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
              authDomain: "quiz-app-e8d1d.firebaseapp.com",
@@ -54,7 +53,7 @@
             const option2 = document.getElementById("option2");
             const option3 = document.getElementById("option3");
             const option4 = document.getElementById("option4");
-            const correctAnswerSelect = document.getElementById("correctAnswer"); // 🔹 ADDED
+            const correctAnswerSelect = document.getElementById("correctAnswer");
 
             const question = questionInput.value.trim();
             const options = [
@@ -64,20 +63,40 @@
                 option4.value.trim()
             ];
             
-            // 🔹 ADDED: Get the correct answer text
-            const correctAnswerIndex = correctAnswerSelect.value;
-            const correctAnswer = options[parseInt(correctAnswerIndex.replace("option", "")) - 1];
+            const correctAnswerIndex = parseInt(correctAnswerSelect.value);
+            const correctAnswer = options[correctAnswerIndex];
 
             // 🔹 Ensure all fields are filled
-            if (question === "" || options.some(opt => opt === "")) {
-                alert("Please fill all fields.");
+            if (!question || options.some(opt => !opt)) {
+                alert("⚠️ Please fill in all fields.");
                 console.warn("⚠️ Fields are empty. Question not saved.");
                 return;
             }
 
+            // 🔹 Ensure all options are unique
+            const uniqueOptions = new Set(options);
+            if (uniqueOptions.size !== options.length) {
+                alert("⚠️ Options must be unique.");
+                console.warn("⚠️ Duplicate options detected.");
+                return;
+            }
+
             try {
+                console.log("🟡 Checking if question already exists...");
+
+                // 🔹 Check if question already exists in Firestore
+                const quizCollection = collection(db, "quizQuestions");
+                const q = query(quizCollection, where("question", "==", question));
+                const querySnapshot = await getDocs(q);
+
+                if (!querySnapshot.empty) {
+                    alert("⚠️ Question already exists. Try a different one.");
+                    console.warn("⚠️ Duplicate question detected.");
+                    return;
+                }
+
                 console.log("🟡 Adding question to Firebase...");
-                await addDoc(collection(db, "quizQuestions"), { question, options, correctAnswer }); // 🔹 ADDED correctAnswer
+                await addDoc(quizCollection, { question, options, correctAnswer });
                 console.log("✅ Question added successfully!");
 
                 alert("✅ Question Added!");
@@ -88,7 +107,7 @@
                 option2.value = "";
                 option3.value = "";
                 option4.value = "";
-                correctAnswerSelect.selectedIndex = 0; // 🔹 Reset dropdown
+                correctAnswerSelect.selectedIndex = 0;
 
                 console.log("🟢 Fields cleared successfully.");
             } catch (error) {

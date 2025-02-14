@@ -47,10 +47,13 @@
                 const questionDiv = document.createElement("div");
                 questionDiv.innerHTML = `<p><strong>${questionIndex + 1}. ${questionText}</strong></p>`;
 
+                // 🔹 Create unique name for each question group
+                const groupName = `question_${questionIndex}`;
+
                 options.forEach((option, optionIndex) => {
                     const inputId = `q${questionIndex}_opt${optionIndex}`;
                     questionDiv.innerHTML += `
-                        <input type="radio" id="${inputId}" name="question_${questionIndex}" value="${option}">
+                        <input type="radio" id="${inputId}" name="${groupName}" value="${option}">
                         <label for="${inputId}">${option}</label><br>
                     `;
                 });

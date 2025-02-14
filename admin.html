@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - Add Questions</title>
+    <title>Admin Panel - Add Questions & Students</title>
 </head>
 <body>
     <h2>Add Quiz Question</h2>
@@ -12,7 +12,7 @@
     <input type="text" id="option2" placeholder="Option 2"><br>
     <input type="text" id="option3" placeholder="Option 3"><br>
     <input type="text" id="option4" placeholder="Option 4"><br>
-    
+
     <label>Correct Answer:</label>
     <select id="correctAnswer">
         <option value="0">Option 1</option>
@@ -20,11 +20,15 @@
         <option value="2">Option 3</option>
         <option value="3">Option 4</option>
     </select>
-    
-    <button id="saveBtn">Save Question</button>
+
+    <button id="saveQuestionBtn">Save Question</button>
+
+    <h2>Add Student</h2>
+    <input type="text" id="studentName" placeholder="Enter Student Name"><br>
+    <input type="text" id="studentID" placeholder="Enter Student ID"><br>
+    <button id="addStudentBtn">Add Student</button>
 
     <script type="module">
-        // 🔹 Import Firebase
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, addDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
@@ -43,77 +47,75 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        document.getElementById("saveBtn").addEventListener("click", saveQuestion);
-        
-        async function saveQuestion() {
+        // 🔹 Save Quiz Question
+        document.getElementById("saveQuestionBtn").addEventListener("click", async () => {
             console.log("🟢 saveQuestion() called");
 
-            const questionInput = document.getElementById("question");
-            const option1 = document.getElementById("option1");
-            const option2 = document.getElementById("option2");
-            const option3 = document.getElementById("option3");
-            const option4 = document.getElementById("option4");
-            const correctAnswerSelect = document.getElementById("correctAnswer");
-
-            const question = questionInput.value.trim();
+            const questionInput = document.getElementById("question").value.trim();
             const options = [
-                option1.value.trim(),
-                option2.value.trim(),
-                option3.value.trim(),
-                option4.value.trim()
+                document.getElementById("option1").value.trim(),
+                document.getElementById("option2").value.trim(),
+                document.getElementById("option3").value.trim(),
+                document.getElementById("option4").value.trim()
             ];
-            
-            const correctAnswerIndex = parseInt(correctAnswerSelect.value);
+            const correctAnswerIndex = parseInt(document.getElementById("correctAnswer").value);
             const correctAnswer = options[correctAnswerIndex];
 
-            // 🔹 Ensure all fields are filled
-            if (!question || options.some(opt => !opt)) {
+            if (!questionInput || options.some(opt => !opt)) {
                 alert("⚠️ Please fill in all fields.");
-                console.warn("⚠️ Fields are empty. Question not saved.");
                 return;
             }
 
-            // 🔹 Ensure all options are unique
-            const uniqueOptions = new Set(options);
-            if (uniqueOptions.size !== options.length) {
+            if (new Set(options).size !== options.length) {
                 alert("⚠️ Options must be unique.");
-                console.warn("⚠️ Duplicate options detected.");
                 return;
             }
 
-            try {
-                console.log("🟡 Checking if question already exists...");
+            const quizCollection = collection(db, "quizQuestions");
+            const q = query(quizCollection, where("question", "==", questionInput));
+            const querySnapshot = await getDocs(q);
 
-                // 🔹 Check if question already exists in Firestore
-                const quizCollection = collection(db, "quizQuestions");
-                const q = query(quizCollection, where("question", "==", question));
-                const querySnapshot = await getDocs(q);
-
-                if (!querySnapshot.empty) {
-                    alert("⚠️ Question already exists. Try a different one.");
-                    console.warn("⚠️ Duplicate question detected.");
-                    return;
-                }
-
-                console.log("🟡 Adding question to Firebase...");
-                await addDoc(quizCollection, { question, options, correctAnswer });
-                console.log("✅ Question added successfully!");
-
-                alert("✅ Question Added!");
-
-                // 🔹 Reset input fields
-                questionInput.value = "";
-                option1.value = "";
-                option2.value = "";
-                option3.value = "";
-                option4.value = "";
-                correctAnswerSelect.selectedIndex = 0;
-
-                console.log("🟢 Fields cleared successfully.");
-            } catch (error) {
-                console.error("❌ Error adding question:", error);
+            if (!querySnapshot.empty) {
+                alert("⚠️ Question already exists.");
+                return;
             }
-        }
+
+            await addDoc(quizCollection, { question: questionInput, options, correctAnswer });
+
+            alert("✅ Question Added!");
+            document.getElementById("question").value = "";
+            document.getElementById("option1").value = "";
+            document.getElementById("option2").value = "";
+            document.getElementById("option3").value = "";
+            document.getElementById("option4").value = "";
+            document.getElementById("correctAnswer").selectedIndex = 0;
+        });
+
+        // 🔹 Add Student to Firebase
+        document.getElementById("addStudentBtn").addEventListener("click", async () => {
+            const studentName = document.getElementById("studentName").value.trim();
+            const studentID = document.getElementById("studentID").value.trim();
+
+            if (!studentName || !studentID) {
+                alert("⚠️ Please enter both Name and ID.");
+                return;
+            }
+
+            const studentCollection = collection(db, "students");
+            const q = query(studentCollection, where("id", "==", studentID));
+            const querySnapshot = await getDocs(q);
+
+            if (!querySnapshot.empty) {
+                alert("⚠️ Student with this ID already exists.");
+                return;
+            }
+
+            await addDoc(studentCollection, { name: studentName, id: studentID });
+
+            alert("✅ Student Added!");
+            document.getElementById("studentName").value = "";
+            document.getElementById("studentID").value = "";
+        });
     </script>
 </body>
 </html>

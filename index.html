@@ -4,6 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz</title>
+    <style>
+        .selected {
+            background-color: lightblue;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
     <h2>Quiz</h2>
@@ -37,6 +43,7 @@
 
             const quizContainer = document.getElementById("quizContainer");
             quizContainer.innerHTML = ""; // Clear previous questions
+            questionsData = []; // 🔹 Reset questionsData to prevent duplicates
 
             const querySnapshot = await getDocs(collection(db, "quizQuestions"));
             let questionIndex = 0;
@@ -62,7 +69,7 @@
                     const inputId = `q${questionIndex}_opt${optionIndex}`;
                     questionDiv.innerHTML += `
                         <input type="radio" id="${inputId}" name="${groupName}" value="${option}">
-                        <label for="${inputId}">${option}</label><br>
+                        <label for="${inputId}" onclick="highlightSelection('${groupName}', '${inputId}')">${option}</label><br>
                     `;
                 });
 
@@ -71,6 +78,16 @@
             });
 
             console.log("✅ Questions loaded successfully!");
+        }
+
+        function highlightSelection(groupName, inputId) {
+            document.querySelectorAll(`input[name="${groupName}"]`).forEach(input => {
+                const label = document.querySelector(`label[for="${input.id}"]`);
+                label.classList.remove("selected");
+            });
+
+            const selectedLabel = document.querySelector(`label[for="${inputId}"]`);
+            selectedLabel.classList.add("selected");
         }
 
         document.getElementById("submitBtn").addEventListener("click", submitQuiz);

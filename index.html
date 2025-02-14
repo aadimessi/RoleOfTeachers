@@ -13,7 +13,7 @@
 </head>
 <body>
     <h2>Quiz</h2>
-    <div id="quizContainer"></div> <!-- Questions will be loaded here -->
+    <div id="quizContainer"></div>
     <button id="submitBtn">Submit</button>
 
     <script type="module">
@@ -36,14 +36,19 @@
 
         let questionsData = [];
         let questionIds = new Set();
-        let loadCallCount = 0;  // 🔹 Track function calls
+        let loadCallCount = 0;
 
         async function loadQuestions() {
+            if (loadCallCount > 0) {
+                console.warn("⚠️ loadQuestions() was already called. Preventing duplicate fetch.");
+                return;
+            }
             loadCallCount++;
+
             console.log(`🟡 loadQuestions() called ${loadCallCount} times`);
 
             const quizContainer = document.getElementById("quizContainer");
-            quizContainer.innerHTML = ""; 
+            quizContainer.innerHTML = "";
             questionsData = [];
             questionIds.clear();
 
@@ -61,7 +66,7 @@
                     const data = doc.data();
                     console.log(`✅ Adding: ${data.question} (ID: ${doc.id})`);
 
-                    const questionIndex = questionsData.length;
+                    const questionIndex = questionIds.size - 1;
                     questionsData.push({
                         questionIndex,
                         correctAnswer: data.correctAnswer
@@ -121,10 +126,8 @@
         }
 
         if (loadCallCount === 0) {
-    loadQuestions();
-}
-
-
+            loadQuestions();
+        }
     </script>
 </body>
 </html>

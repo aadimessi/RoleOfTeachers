@@ -10,7 +10,7 @@ function loadQuestion() {
     }
 
     if (currentQuestionIndex >= questions.length) {
-        document.querySelector(".quiz-container").innerHTML = `<h2>Quiz Completed!</h2><p>Your Score: ${score} / ${questions.length}</p>`;
+        showFinalScore();
         return;
     }
 
@@ -58,6 +58,13 @@ function submitAnswer() {
         selectedOption = null;
         loadQuestion();
     }, 1000);
+}
+
+function showFinalScore() {
+    setTimeout(() => {
+        alert(`Quiz Completed!\nYour Score: ${score} / ${questions.length}`);
+        window.close(); // 🔹 Closes the quiz page
+    }, 500);
 }
 
 // Load the first question when the page loads

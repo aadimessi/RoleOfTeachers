@@ -12,8 +12,17 @@
     <input type="text" id="option2" placeholder="Option 2"><br>
     <input type="text" id="option3" placeholder="Option 3"><br>
     <input type="text" id="option4" placeholder="Option 4"><br>
+    
+    <!-- 🔹 ADDED: Correct Answer Selection -->
+    <label>Correct Answer:</label>
+    <select id="correctAnswer">
+        <option value="option1">Option 1</option>
+        <option value="option2">Option 2</option>
+        <option value="option3">Option 3</option>
+        <option value="option4">Option 4</option>
+    </select>
+    
     <button id="saveBtn">Save Question</button>
-
 
     <script type="module">
         // 🔹 Import Firebase
@@ -45,6 +54,7 @@
             const option2 = document.getElementById("option2");
             const option3 = document.getElementById("option3");
             const option4 = document.getElementById("option4");
+            const correctAnswerSelect = document.getElementById("correctAnswer"); // 🔹 ADDED
 
             const question = questionInput.value.trim();
             const options = [
@@ -53,6 +63,10 @@
                 option3.value.trim(),
                 option4.value.trim()
             ];
+            
+            // 🔹 ADDED: Get the correct answer text
+            const correctAnswerIndex = correctAnswerSelect.value;
+            const correctAnswer = options[parseInt(correctAnswerIndex.replace("option", "")) - 1];
 
             // 🔹 Ensure all fields are filled
             if (question === "" || options.some(opt => opt === "")) {
@@ -63,7 +77,7 @@
 
             try {
                 console.log("🟡 Adding question to Firebase...");
-                await addDoc(collection(db, "quizQuestions"), { question, options });
+                await addDoc(collection(db, "quizQuestions"), { question, options, correctAnswer }); // 🔹 ADDED correctAnswer
                 console.log("✅ Question added successfully!");
 
                 alert("✅ Question Added!");
@@ -74,6 +88,7 @@
                 option2.value = "";
                 option3.value = "";
                 option4.value = "";
+                correctAnswerSelect.selectedIndex = 0; // 🔹 Reset dropdown
 
                 console.log("🟢 Fields cleared successfully.");
             } catch (error) {

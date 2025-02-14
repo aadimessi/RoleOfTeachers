@@ -120,7 +120,10 @@
             alert(`✅ Quiz Submitted!\nYour Score: ${correctCount}/${totalQuestions}`);
         }
 
-        loadQuestions();
+        if (loadCallCount === 0) {
+    loadQuestions();
+}
+
 
     </script>
 </body>

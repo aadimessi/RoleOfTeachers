@@ -21,7 +21,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // 🔹 Firebase Configuration (Replace with your Firebase config)
+        // 🔹 Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
             authDomain: "quiz-app-e8d1d.firebaseapp.com",
@@ -36,56 +36,56 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let questionsData = []; // Store questions for validation
+        let questionsData = []; // Store questions
         let questionIds = new Set(); // Track unique question IDs
 
         async function loadQuestions() {
-            console.log("🟡 Loading questions from Firebase...");
+            console.log("🟡 Fetching questions from Firebase...");
 
             const quizContainer = document.getElementById("quizContainer");
-            quizContainer.innerHTML = ""; // Clear previous questions
-            questionsData = []; // Reset questionsData
-            questionIds.clear(); // Clear previous question tracking
+            quizContainer.innerHTML = ""; // Clear previous content
+            questionsData = []; // Reset array
+            questionIds.clear(); // Reset IDs
 
-            const querySnapshot = await getDocs(collection(db, "quizQuestions"));
-            
-            querySnapshot.forEach((doc) => {
-                if (questionIds.has(doc.id)) {
-                    console.warn(`⚠️ Duplicate question detected: ${doc.id}, skipping...`);
-                    return; // Skip duplicate question
-                }
+            try {
+                const querySnapshot = await getDocs(collection(db, "quizQuestions"));
+                console.log(`📌 Total questions fetched: ${querySnapshot.size}`);
 
-                const data = doc.data();
-                const questionText = data.question;
-                const options = data.options;
-                const correctAnswer = data.correctAnswer; // 🔹 Get the correct answer
+                querySnapshot.forEach((doc) => {
+                    if (questionIds.has(doc.id)) {
+                        console.warn(`⚠️ Duplicate question detected: ${doc.id}, skipping...`);
+                        return;
+                    }
 
-                const questionIndex = questionsData.length; // Corrected indexing
-                questionIds.add(doc.id); // Mark question as added
+                    const data = doc.data();
+                    console.log(`✅ Adding question: ${data.question} (ID: ${doc.id})`);
 
-                questionsData.push({
-                    questionIndex,
-                    correctAnswer
+                    const questionIndex = questionsData.length; // Correct indexing
+                    questionIds.add(doc.id); // Track question
+                    questionsData.push({
+                        questionIndex,
+                        correctAnswer: data.correctAnswer
+                    });
+
+                    const questionDiv = document.createElement("div");
+                    questionDiv.innerHTML = `<p><strong>${questionIndex + 1}. ${data.question}</strong></p>`;
+
+                    const groupName = `question_${questionIndex}`;
+                    data.options.forEach((option, optionIndex) => {
+                        const inputId = `q${questionIndex}_opt${optionIndex}`;
+                        questionDiv.innerHTML += `
+                            <input type="radio" id="${inputId}" name="${groupName}" value="${option}">
+                            <label for="${inputId}" onclick="highlightSelection('${groupName}', '${inputId}')">${option}</label><br>
+                        `;
+                    });
+
+                    quizContainer.appendChild(questionDiv);
                 });
 
-                const questionDiv = document.createElement("div");
-                questionDiv.innerHTML = `<p><strong>${questionIndex + 1}. ${questionText}</strong></p>`;
-
-                // 🔹 Each question must have a **unique name**
-                const groupName = `question_${questionIndex}`;
-
-                options.forEach((option, optionIndex) => {
-                    const inputId = `q${questionIndex}_opt${optionIndex}`;
-                    questionDiv.innerHTML += `
-                        <input type="radio" id="${inputId}" name="${groupName}" value="${option}">
-                        <label for="${inputId}" onclick="highlightSelection('${groupName}', '${inputId}')">${option}</label><br>
-                    `;
-                });
-
-                quizContainer.appendChild(questionDiv);
-            });
-
-            console.log("✅ Questions loaded successfully!");
+                console.log("✅ Questions loaded successfully!");
+            } catch (error) {
+                console.error("❌ Error loading questions:", error);
+            }
         }
 
         function highlightSelection(groupName, inputId) {
@@ -123,7 +123,8 @@
             alert(`✅ Quiz Submitted!\nYour Score: ${correctCount}/${totalQuestions}`);
         }
 
-        loadQuestions();
+        loadQuestions(); // Load questions once
+
     </script>
 </body>
 </html>

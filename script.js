@@ -1,11 +1,12 @@
 // ✅ 1. Initialize Firebase (Add your Firebase config)
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_AUTH_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_STORAGE_BUCKET",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID"
+            apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
+            authDomain: "quiz-app-e8d1d.firebaseapp.com",
+            projectId: "quiz-app-e8d1d",
+            storageBucket: "quiz-app-e8d1d.firebasestorage.app",
+            messagingSenderId: "421848385039",
+            appId: "1:421848385039:web:cbb560cf9d839752ce457a",
+            measurementId: "G-MBCSZVWMZP"
 };
 
 firebase.initializeApp(firebaseConfig);

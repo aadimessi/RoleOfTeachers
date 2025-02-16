@@ -1,4 +1,9 @@
 let questions = JSON.parse(localStorage.getItem("questions")) || [];
+if (!Array.isArray(questions)) {
+    console.error("❌ questions is not an array!");
+    questions = []; // Reset to empty array
+}
+
 let currentQuestionIndex = 0;
 let selectedOption = null;
 let score = 0;

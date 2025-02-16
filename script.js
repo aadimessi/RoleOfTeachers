@@ -1,11 +1,5 @@
 let questions = JSON.parse(localStorage.getItem("questions")) || [];
 
-if (!questions || questions.length === 0) {
-    console.log("⚠️ No questions found in localStorage!");
-} else {
-    console.log("✅ Questions loaded successfully:", questions);
-}
-
 let currentQuestionIndex = 0;
 let selectedOption = null;
 let score = 0;

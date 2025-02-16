@@ -5,8 +5,10 @@ let score = 0;
 
 function loadQuestion() {
     console.log("Loading Question:", currentQuestionIndex); // Debugging
+    console.log("Total Questions:", questions.length);
+    console.log("Questions Array:", questions);
 
-    if (questions.length === 0) {
+    if (!Array.isArray(questions) || questions.length === 0) {
         document.querySelector(".quiz-container").innerHTML = `
             <h2>No questions available. Please ask your teacher to set the questions.</h2>
         `;
@@ -20,17 +22,16 @@ function loadQuestion() {
 
     let currentQuestion = questions[currentQuestionIndex];
 
-    // ✅ Make sure the question container exists
     let questionElement = document.getElementById('question');
     let optionsContainer = document.getElementById('options');
-    
+
     if (!questionElement || !optionsContainer) {
         console.error("❌ Missing #question or #options element in HTML.");
         return;
     }
 
-   questionElement.innerText = `Q${currentQuestionIndex + 1} of ${questions.length}: ${currentQuestion.question}`;
-
+    let totalQuestions = questions.length || 0; // Ensure it's a valid number
+    questionElement.innerText = `Q${currentQuestionIndex + 1} of ${totalQuestions}: ${currentQuestion.question}`;
 
     optionsContainer.innerHTML = ""; // Clear previous options
 
@@ -48,6 +49,7 @@ function loadQuestion() {
 
     document.getElementById('result').innerText = "";
 }
+
 
 function submitAnswer() {
     if (!selectedOption) {

@@ -5,116 +5,112 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz</title>
     <style>
-        body {
-            text-align: center;
-            font-family: Arial, sans-serif;
-        }
-        .quiz-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
-        .question {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 20px;
-        }
-        .option {
-            display: block;
-            margin: 10px;
-            padding: 10px;
-            font-size: 18px;
-            cursor: pointer;
-            border: 1px solid #000;
-            width: 50%;
-            text-align: center;
-        }
         .selected {
             background-color: lightblue;
             font-weight: bold;
         }
+        #quizSection {
+            display: none;
+            text-align: center;
+        }
+        #questionContainer {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
-    <div class="quiz-container">
-        <div id="question" class="question"></div>
-        <div id="options"></div>
-        <button id="submitBtn">Submit</button>
+    <h2>Student Login</h2>
+    <input type="text" id="studentName" placeholder="Enter your name"><br>
+    <input type="text" id="studentID" placeholder="Enter your ID"><br>
+    <button id="loginBtn">Start Quiz</button>
+
+    <div id="quizSection">
+        <h2>Quiz</h2>
+        <div id="questionContainer"></div>
+        <div id="optionsContainer"></div>
+        <button id="submitBtn">Next</button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
-            authDomain: "quiz-app-e8d1d.firebaseapp.com",
-            projectId: "quiz-app-e8d1d",
-            storageBucket: "quiz-app-e8d1d.firebasestorage.app",
-            messagingSenderId: "421848385039",
-            appId: "1:421848385039:web:cbb560cf9d839752ce457a",
-            measurementId: "G-MBCSZVWMZP"
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID",
+            measurementId: "YOUR_MEASUREMENT_ID"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        let questions = [];
+        let questionsData = [];
         let currentQuestionIndex = 0;
-        let score = 0;
-        let selectedOption = null;
+
+        document.getElementById("loginBtn").addEventListener("click", async () => {
+            const studentName = document.getElementById("studentName").value.trim();
+            const studentID = document.getElementById("studentID").value.trim();
+
+            if (!studentName || !studentID) {
+                alert("⚠️ Please enter both Name and ID.");
+                return;
+            }
+
+            const studentCollection = collection(db, "students");
+            const q = query(studentCollection, where("id", "==", studentID));
+            const querySnapshot = await getDocs(q);
+
+            if (querySnapshot.empty) {
+                alert("❌ Student not found! You are not authorized to take the quiz.");
+                return;
+            }
+
+            document.getElementById("quizSection").style.display = "block";
+            document.getElementById("loginBtn").disabled = true;
+            loadQuestions();
+        });
 
         async function loadQuestions() {
             const querySnapshot = await getDocs(collection(db, "quizQuestions"));
-            querySnapshot.forEach((doc) => {
-                questions.push(doc.data());
-            });
+            questionsData = querySnapshot.docs.map(doc => doc.data());
             displayQuestion();
         }
 
         function displayQuestion() {
-            if (currentQuestionIndex >= questions.length) {
-                document.querySelector(".quiz-container").innerHTML = `<h2>Quiz Completed!</h2><p>Your Score: ${score} / ${questions.length}</p>`;
+            if (currentQuestionIndex >= questionsData.length) {
+                alert("✅ Quiz Completed!");
                 return;
             }
 
-            let currentQuestion = questions[currentQuestionIndex];
-            document.getElementById("question").innerText = currentQuestion.question;
-            let optionsContainer = document.getElementById("options");
-            optionsContainer.innerHTML = "";
+            const questionData = questionsData[currentQuestionIndex];
+            document.getElementById("questionContainer").innerHTML = `${currentQuestionIndex + 1}. ${questionData.question}`;
 
-            currentQuestion.options.forEach(optionText => {
-                let button = document.createElement("button");
-                button.innerText = optionText;
-                button.classList.add("option");
-                button.onclick = function() {
-                    document.querySelectorAll(".option").forEach(btn => btn.classList.remove("selected"));
-                    button.classList.add("selected");
-                    selectedOption = optionText;
-                };
-                optionsContainer.appendChild(button);
+            const optionsContainer = document.getElementById("optionsContainer");
+            optionsContainer.innerHTML = "";
+            questionData.options.forEach((option, index) => {
+                const inputId = `q${currentQuestionIndex}_opt${index}`;
+                optionsContainer.innerHTML += `
+                    <input type="radio" id="${inputId}" name="question" value="${option}">
+                    <label for="${inputId}">${option}</label><br>
+                `;
             });
         }
 
-        document.getElementById("submitBtn").addEventListener("click", function() {
+        document.getElementById("submitBtn").addEventListener("click", () => {
+            const selectedOption = document.querySelector('input[name="question"]:checked');
             if (!selectedOption) {
-                alert("Please select an option!");
+                alert("⚠️ Please select an answer before proceeding.");
                 return;
             }
-
-            let currentQuestion = questions[currentQuestionIndex];
-            if (selectedOption === currentQuestion.correctAnswer) {
-                score++;
-            }
-
             currentQuestionIndex++;
-            selectedOption = null;
             displayQuestion();
         });
-
-        loadQuestions();
     </script>
 </body>
 </html>

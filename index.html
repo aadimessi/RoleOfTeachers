@@ -145,10 +145,13 @@
 
         function calculateScore() {
             let correctCount = 0;
+            let incorrectCount = 0;
 
             questionsData.forEach(({ index, correctAnswer }) => {
                 if (studentAnswers[index] === correctAnswer) {
                     correctCount++;
+                } else {
+                    incorrectCount++;
                 }
             });
 
@@ -156,7 +159,10 @@
             document.getElementById("questionContainer").style.display = "none";
             document.getElementById("submitBtn").style.display = "none";
             document.getElementById("result").style.display = "block";
-            document.getElementById("result").innerHTML = `✅ Quiz Completed! Your Score: ${correctCount}/${totalQuestions}`;
+            document.getElementById("result").innerHTML = `✅ Quiz Completed! <br> 
+                <strong>Score: ${correctCount}/${totalQuestions}</strong> <br>
+                ✅ Correct Answers: ${correctCount} <br>
+                ❌ Incorrect Answers: ${incorrectCount}`;
         }
 
         window.highlightSelection = function(groupName, inputId) {

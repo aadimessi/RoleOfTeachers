@@ -1,31 +1,30 @@
-// ✅ Initialize Firebase (Add your Firebase config here)
+// ✅ 1. Initialize Firebase (Add your Firebase config)
 const firebaseConfig = {
-            apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
-            authDomain: "quiz-app-e8d1d.firebaseapp.com",
-            projectId: "quiz-app-e8d1d",
-            storageBucket: "quiz-app-e8d1d.firebasestorage.app",
-            messagingSenderId: "421848385039",
-            appId: "1:421848385039:web:cbb560cf9d839752ce457a",
-            measurementId: "G-MBCSZVWMZP"
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
 };
 
-// ✅ Initialize Firebase
 firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore(); // Get Firestore reference
+const db = firebase.firestore(); // Firestore reference
 
-// ✅ Global variables
+// ✅ 2. Declare Global Variables
 let questions = [];
 let currentQuestionIndex = 0;
 let selectedOption = null;
 let score = 0;
 
-// ✅ Function to fetch questions from Firebase
+// ✅ 3. Fetch Questions from Firestore (Your function here)
 async function loadQuestions() {
     try {
         console.log("🔄 Fetching questions from Firebase...");
         
         const snapshot = await db.collection("quiz_questions").get();
         if (snapshot.empty) {
+            console.warn("⚠️ No questions found in Firestore.");
             document.querySelector(".quiz-container").innerHTML = `<h2>No questions available. Please ask your teacher to set the questions.</h2>`;
             return;
         }
@@ -34,7 +33,12 @@ async function loadQuestions() {
         questions = snapshot.docs.map(doc => doc.data());
         console.log("✅ Fetched Questions:", questions);
 
-        // ✅ Load the first question after fetching
+        if (questions.length === 0) {
+            console.error("⚠️ Error: No questions were loaded from Firestore.");
+            return;
+        }
+
+        // ✅ Load the first question
         currentQuestionIndex = 0;
         loadQuestion();
     } catch (error) {
@@ -42,7 +46,7 @@ async function loadQuestions() {
     }
 }
 
-// ✅ Function to load a question
+// ✅ 4. Function to Load a Question
 function loadQuestion() {
     console.log("Current Question Index:", currentQuestionIndex);
 
@@ -84,14 +88,11 @@ function loadQuestion() {
     document.getElementById('result').innerText = "";
 }
 
-// ✅ Call Firebase function when page loads
+// ✅ 5. Load Questions when Page Loads
 window.onload = function () {
     console.log("🔄 Initializing Quiz...");
-    loadQuestions(); // 🔥 Fetch from Firebase instead of localStorage
+    loadQuestions(); // Fetch from Firebase instead of localStorage
 };
-
-
-
 
 function submitAnswer() {
     if (!selectedOption) {

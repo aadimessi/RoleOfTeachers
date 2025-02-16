@@ -32,6 +32,7 @@
         <h2>Quiz</h2>
         <div id="questionContainer"></div>
         <button id="submitBtn" style="display:none;">Next</button>
+        <h3 id="result" style="display:none;"></h3>
     </div>
 
     <script type="module">
@@ -53,6 +54,7 @@
 
         let questionsData = [];
         let currentQuestionIndex = 0;
+        let studentAnswers = {};
 
         document.getElementById("loginBtn").addEventListener("click", async () => {
             const studentName = document.getElementById("studentName").value.trim();
@@ -100,7 +102,7 @@
 
         function displayQuestion() {
             if (currentQuestionIndex >= questionsData.length) {
-                alert("✅ Quiz Completed!");
+                calculateScore();
                 return;
             }
 
@@ -126,9 +128,36 @@
         }
 
         document.getElementById("submitBtn").addEventListener("click", () => {
+            const currentQuestion = questionsData[currentQuestionIndex];
+            const selectedOption = document.querySelector(`input[name="question_${currentQuestion.index}"]:checked`);
+
+            if (!selectedOption) {
+                alert("⚠️ Please select an answer before proceeding.");
+                return;
+            }
+
+            // Store answer
+            studentAnswers[currentQuestion.index] = selectedOption.value;
+
             currentQuestionIndex++;
             displayQuestion();
         });
+
+        function calculateScore() {
+            let correctCount = 0;
+
+            questionsData.forEach(({ index, correctAnswer }) => {
+                if (studentAnswers[index] === correctAnswer) {
+                    correctCount++;
+                }
+            });
+
+            const totalQuestions = questionsData.length;
+            document.getElementById("questionContainer").style.display = "none";
+            document.getElementById("submitBtn").style.display = "none";
+            document.getElementById("result").style.display = "block";
+            document.getElementById("result").innerHTML = `✅ Quiz Completed! Your Score: ${correctCount}/${totalQuestions}`;
+        }
 
         window.highlightSelection = function(groupName, inputId) {
             document.querySelectorAll(`input[name="${groupName}"]`).forEach(input => {

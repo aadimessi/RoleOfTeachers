@@ -6,73 +6,145 @@
     <title>Quiz</title>
     <style>
         body {
-            text-align: center;
             font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f4f4f4;
+            margin: 0;
+            text-align: center;
         }
+
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 500px;
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            border: none;
+            background: #007bff;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+
+        .btn:hover {
+            background: #0056b3;
+        }
+
         #quizSection {
             display: none;
         }
-        .question {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        #questionContainer {
-            display: none;
-            text-align: center;
-            width: 50%;
-            margin: 0 auto;
-        }
-        .options-container {
-            display: flex;
-            flex-direction: column;
-            align-items: start;
-            gap: 10px;
-        }
-        .option {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-        }
-        .selected {
-            background-color: lightblue;
-            font-weight: bold;
-        }
+
         .timer {
             font-size: 18px;
             color: red;
             margin-bottom: 10px;
         }
+
+        .question {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            width: 90%;
+            background: #007bff;
+            color: white;
+            padding: 10px;
+            margin: 5px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.3s ease-in-out;
+            text-align: left;
+        }
+
+        .option input {
+            margin-right: 10px;
+            transform: scale(1.3);
+            cursor: pointer;
+        }
+
+        .option:hover {
+            background: #0056b3;
+        }
+
+        .selected {
+            background: #28a745 !important;
+        }
+
+        #submitBtn {
+            display: none;
+        }
+
+        #result {
+            display: none;
+            font-size: 18px;
+            font-weight: bold;
+            color: green;
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
-    <h2>Student Login</h2>
-    <input type="text" id="studentName" placeholder="Enter your name"><br>
-    <input type="text" id="studentID" placeholder="Enter your ID"><br>
-    <button id="loginBtn">Start Quiz</button>
 
-    <div id="quizSection">
+    <div class="container" id="loginSection">
+        <h2>Student Login</h2>
+        <input type="text" id="studentName" class="input-field" placeholder="Enter your name">
+        <input type="text" id="studentID" class="input-field" placeholder="Enter your ID">
+        <button id="loginBtn" class="btn">Start Quiz</button>
+    </div>
+
+    <div class="container" id="quizSection">
         <h2>Quiz</h2>
         <div id="timer" class="timer"></div>
         <div id="questionContainer"></div>
-        <button id="submitBtn" style="display:none;">Next</button>
-        <h3 id="result" style="display:none;"></h3>
+        <button id="submitBtn" class="btn">Next</button>
+        <h3 id="result"></h3>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // ✅ Ensure Firebase Config is correctly added
         const firebaseConfig = {
-             apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
-             authDomain: "quiz-app-e8d1d.firebaseapp.com",
-             projectId: "quiz-app-e8d1d",
-             storageBucket: "quiz-app-e8d1d.firebasestorage.app",
-             messagingSenderId: "421848385039",
-             appId: "1:421848385039:web:cbb560cf9d839752ce457a",
-             measurementId: "G-MBCSZVWMZP"
+            apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
+            authDomain: "quiz-app-e8d1d.firebaseapp.com",
+            projectId: "quiz-app-e8d1d",
+            storageBucket: "quiz-app-e8d1d.firebasestorage.app",
+            messagingSenderId: "421848385039",
+            appId: "1:421848385039:web:cbb560cf9d839752ce457a",
+            measurementId: "G-MBCSZVWMZP"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -101,26 +173,25 @@
                 return;
             }
 
+            document.getElementById("loginSection").style.display = "none";
             document.getElementById("quizSection").style.display = "block";
-            document.getElementById("loginBtn").disabled = true;
             loadQuestions();
         });
 
         async function loadQuestions() {
             const querySnapshot = await getDocs(collection(db, "quizQuestions"));
             questionsData = [];
-            let questionCounter = 1;
 
-            querySnapshot.forEach((doc) => {
+            querySnapshot.forEach((doc, index) => {
                 const data = doc.data();
                 questionsData.push({
-                    index: questionCounter,
+                    index: index + 1,
                     question: data.question,
                     options: shuffleArray(data.options),
                     correctAnswer: data.correctAnswer
                 });
-                questionCounter++;
             });
+
             questionsData = shuffleArray(questionsData);
             displayQuestion();
         }
@@ -143,17 +214,25 @@
             const groupName = `question_${index}`;
 
             options.forEach((option, optionIndex) => {
-                const inputId = `q${index}_opt${optionIndex}`;
                 questionHTML += `
                     <label class="option">
-                        <input type="radio" id="${inputId}" name="${groupName}" value="${option}">
+                        <input type="radio" name="${groupName}" value="${option}">
                         ${option}
                     </label>
                 `;
             });
+
             questionHTML += `</div>`;
             questionContainer.innerHTML = questionHTML;
             document.getElementById("submitBtn").style.display = "block";
+
+            document.querySelectorAll(".option").forEach(option => {
+                option.addEventListener("click", function () {
+                    document.querySelectorAll(".option").forEach(opt => opt.classList.remove("selected"));
+                    this.classList.add("selected");
+                    this.querySelector("input").checked = true;
+                });
+            });
         }
 
         document.getElementById("submitBtn").addEventListener("click", () => {
@@ -164,42 +243,22 @@
                 alert("⚠️ Please select an answer before proceeding.");
                 return;
             }
+
             studentAnswers[currentQuestion.index] = selectedOption.value;
             currentQuestionIndex++;
             displayQuestion();
         });
 
         function calculateScore() {
-            let correctCount = 0;
-            questionsData.forEach(({ index, correctAnswer }) => {
-                if (studentAnswers[index] === correctAnswer) {
-                    correctCount++;
-                }
-            });
-            document.getElementById("questionContainer").style.display = "none";
-            document.getElementById("submitBtn").style.display = "none";
-            document.getElementById("result").style.display = "block";
+            let correctCount = questionsData.filter(q => studentAnswers[q.index] === q.correctAnswer).length;
             document.getElementById("result").innerHTML = `✅ Quiz Completed! <br> Score: ${correctCount}/${questionsData.length}`;
-        }
-
-        function startTimer(seconds) {
-            const timerDisplay = document.getElementById("timer");
-            let timeLeft = seconds;
-            timerDisplay.innerHTML = `Time Left: ${timeLeft}s`;
-
-            timerInterval = setInterval(() => {
-                timeLeft--;
-                timerDisplay.innerHTML = `Time Left: ${timeLeft}s`;
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    document.getElementById("submitBtn").click();
-                }
-            }, 1000);
+            document.getElementById("result").style.display = "block";
         }
 
         function shuffleArray(array) {
             return array.sort(() => Math.random() - 0.5);
         }
     </script>
+
 </body>
 </html>

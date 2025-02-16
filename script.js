@@ -7,22 +7,19 @@ if (!Array.isArray(questions)) {
 let currentQuestionIndex = 0;
 let selectedOption = null;
 let score = 0;
-function loadQuestion() {
-    console.log("🔍 Debugging currentQuestionIndex:");
-    console.log("Value:", currentQuestionIndex);
-    console.log("Type:", typeof currentQuestionIndex);
-    console.log("Questions Array:", questions);
-    console.log("Total Questions:", questions.length);
 
-    if (!Array.isArray(questions) || questions.length === 0) {
+function loadQuestion() {
+    console.log("Loading Question:", currentQuestionIndex); // Debugging
+
+    if (!questions || questions.length === 0) {
         document.querySelector(".quiz-container").innerHTML = `
             <h2>No questions available. Please ask your teacher to set the questions.</h2>
         `;
         return;
     }
 
+    // ✅ Ensure currentQuestionIndex is a valid number
     if (isNaN(currentQuestionIndex) || currentQuestionIndex < 0) {
-        console.error("❌ Invalid currentQuestionIndex. Resetting to 0.");
         currentQuestionIndex = 0;
     }
 
@@ -33,16 +30,17 @@ function loadQuestion() {
 
     let currentQuestion = questions[currentQuestionIndex];
 
+    // ✅ Make sure the question container exists
     let questionElement = document.getElementById('question');
     let optionsContainer = document.getElementById('options');
-
+    
     if (!questionElement || !optionsContainer) {
         console.error("❌ Missing #question or #options element in HTML.");
         return;
     }
 
-    let questionNumber = isNaN(currentQuestionIndex) ? 1 : currentQuestionIndex + 1;
-    questionElement.innerText = `Q${questionNumber}. ${currentQuestion.question}`;
+    // ✅ Add a valid question number
+    questionElement.innerText = `${currentQuestionIndex + 1}. ${currentQuestion.question}`;
 
     optionsContainer.innerHTML = ""; // Clear previous options
 
@@ -60,6 +58,7 @@ function loadQuestion() {
 
     document.getElementById('result').innerText = "";
 }
+
 
 
 

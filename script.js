@@ -5,18 +5,11 @@ let selectedOption = null;
 let score = 0;
 
 function loadQuestion() {
-    console.log("Loading Question:", currentQuestionIndex); // Debugging
+    console.log("Current Question Index:", currentQuestionIndex); // Debugging
 
     if (!questions || questions.length === 0) {
-        document.querySelector(".quiz-container").innerHTML = `
-            <h2>No questions available. Please ask your teacher to set the questions.</h2>
-        `;
+        document.querySelector(".quiz-container").innerHTML = `<h2>No questions available. Please ask your teacher to set the questions.</h2>`;
         return;
-    }
-
-    // ✅ Ensure currentQuestionIndex is a valid number
-    if (isNaN(currentQuestionIndex) || currentQuestionIndex < 0) {
-        currentQuestionIndex = 0;
     }
 
     if (currentQuestionIndex >= questions.length) {
@@ -25,21 +18,19 @@ function loadQuestion() {
     }
 
     let currentQuestion = questions[currentQuestionIndex];
-
-    // ✅ Make sure the question container exists
-    let questionElement = document.getElementById('question');
-    let optionsContainer = document.getElementById('options');
     
-    if (!questionElement || !optionsContainer) {
-        console.error("❌ Missing #question or #options element in HTML.");
+    // 🔹 Ensure currentQuestion is defined
+    if (!currentQuestion || !currentQuestion.question) {
+        console.error("❌ Error: Question data is missing!", currentQuestion);
         return;
     }
 
-    // ✅ Add a valid question number
+    let questionElement = document.getElementById('question');
+    let optionsContainer = document.getElementById('options');
+
     questionElement.innerText = `${currentQuestionIndex + 1}. ${currentQuestion.question}`;
 
     optionsContainer.innerHTML = ""; // Clear previous options
-
     currentQuestion.options.forEach(optionText => {
         let button = document.createElement('button');
         button.innerText = optionText;
@@ -54,6 +45,7 @@ function loadQuestion() {
 
     document.getElementById('result').innerText = "";
 }
+
 
 
 

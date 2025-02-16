@@ -9,15 +9,20 @@ let selectedOption = null;
 let score = 0;
 
 function loadQuestion() {
-    console.log("Loading Question:", currentQuestionIndex); // Debugging
-    console.log("Total Questions:", questions.length);
+    console.log("Loading Question:", currentQuestionIndex);
     console.log("Questions Array:", questions);
+    console.log("Total Questions:", questions.length);
 
     if (!Array.isArray(questions) || questions.length === 0) {
         document.querySelector(".quiz-container").innerHTML = `
             <h2>No questions available. Please ask your teacher to set the questions.</h2>
         `;
         return;
+    }
+
+    if (isNaN(currentQuestionIndex) || currentQuestionIndex < 0) {
+        console.error("❌ Invalid currentQuestionIndex. Resetting to 0.");
+        currentQuestionIndex = 0;
     }
 
     if (currentQuestionIndex >= questions.length) {
@@ -35,8 +40,8 @@ function loadQuestion() {
         return;
     }
 
-    let totalQuestions = questions.length || 0; // Ensure it's a valid number
-    questionElement.innerText = `Q${currentQuestionIndex + 1} of ${totalQuestions}: ${currentQuestion.question}`;
+    let questionNumber = !isNaN(currentQuestionIndex) ? currentQuestionIndex + 1 : 1;
+    questionElement.innerText = `Q${questionNumber}. ${currentQuestion.question}`;
 
     optionsContainer.innerHTML = ""; // Clear previous options
 

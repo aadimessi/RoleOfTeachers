@@ -7,9 +7,10 @@ if (!Array.isArray(questions)) {
 let currentQuestionIndex = 0;
 let selectedOption = null;
 let score = 0;
-
 function loadQuestion() {
-    console.log("Loading Question:", currentQuestionIndex);
+    console.log("🔍 Debugging currentQuestionIndex:");
+    console.log("Value:", currentQuestionIndex);
+    console.log("Type:", typeof currentQuestionIndex);
     console.log("Questions Array:", questions);
     console.log("Total Questions:", questions.length);
 
@@ -40,7 +41,7 @@ function loadQuestion() {
         return;
     }
 
-    let questionNumber = !isNaN(currentQuestionIndex) ? currentQuestionIndex + 1 : 1;
+    let questionNumber = isNaN(currentQuestionIndex) ? 1 : currentQuestionIndex + 1;
     questionElement.innerText = `Q${questionNumber}. ${currentQuestion.question}`;
 
     optionsContainer.innerHTML = ""; // Clear previous options
@@ -59,6 +60,7 @@ function loadQuestion() {
 
     document.getElementById('result').innerText = "";
 }
+
 
 
 function submitAnswer() {

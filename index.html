@@ -3,29 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Quiz</title>
+    <title>Quiz</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
             text-align: center;
+            font-family: Arial, sans-serif;
+        }
+        .quiz-container {
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
-            background-color: #f4f4f4;
-        }
-        .quiz-container {
-            display: none;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         .question {
             font-size: 24px;
             font-weight: bold;
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .option {
+            display: block;
+            margin: 10px;
+            padding: 10px;
+            font-size: 18px;
+            cursor: pointer;
+            border: 1px solid #000;
+            width: 50%;
+            text-align: center;
         }
         .selected {
             background-color: lightblue;
@@ -34,14 +38,9 @@
     </style>
 </head>
 <body>
-    <h2>Student Login</h2>
-    <input type="text" id="studentName" placeholder="Enter your name"><br>
-    <input type="text" id="studentID" placeholder="Enter your ID"><br>
-    <button id="loginBtn">Login</button>
-    
-    <div class="quiz-container" id="quizContainer">
-        <h2>Quiz</h2>
-        <div id="questionBox"></div>
+    <div class="quiz-container">
+        <div id="question" class="question"></div>
+        <div id="options"></div>
         <button id="submitBtn">Submit</button>
     </div>
 
@@ -62,63 +61,60 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        document.getElementById("loginBtn").addEventListener("click", async () => {
-            const name = document.getElementById("studentName").value.trim();
-            const id = document.getElementById("studentID").value.trim();
+        let questions = [];
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let selectedOption = null;
 
-            if (!name || !id) {
-                alert("⚠️ Please enter both name and ID.");
+        async function loadQuestions() {
+            const querySnapshot = await getDocs(collection(db, "quizQuestions"));
+            querySnapshot.forEach((doc) => {
+                questions.push(doc.data());
+            });
+            displayQuestion();
+        }
+
+        function displayQuestion() {
+            if (currentQuestionIndex >= questions.length) {
+                document.querySelector(".quiz-container").innerHTML = `<h2>Quiz Completed!</h2><p>Your Score: ${score} / ${questions.length}</p>`;
                 return;
             }
 
-            const studentsRef = collection(db, "students");
-            const querySnapshot = await getDocs(studentsRef);
-            let isValid = false;
+            let currentQuestion = questions[currentQuestionIndex];
+            document.getElementById("question").innerText = currentQuestion.question;
+            let optionsContainer = document.getElementById("options");
+            optionsContainer.innerHTML = "";
 
-            querySnapshot.forEach(doc => {
-                const student = doc.data();
-                if (student.name === name && student.id === id) {
-                    isValid = true;
-                }
-            });
-
-            if (isValid) {
-                alert("✅ Login successful!");
-                document.getElementById("quizContainer").style.display = "block";
-                loadQuestions();
-            } else {
-                alert("❌ Invalid Name or ID. Access Denied.");
-            }
-        });
-
-        async function loadQuestions() {
-            const questionBox = document.getElementById("questionBox");
-            questionBox.innerHTML = "";
-
-            const querySnapshot = await getDocs(collection(db, "quizQuestions"));
-            querySnapshot.forEach((doc, index) => {
-                const data = doc.data();
-                
-                const questionDiv = document.createElement("div");
-                questionDiv.classList.add("question");
-                questionDiv.innerHTML = `<p>${index + 1}. ${data.question}</p>`;
-
-                const groupName = `question_${index}`;
-                data.options.forEach((option, optionIndex) => {
-                    const inputId = `q${index}_opt${optionIndex}`;
-                    questionDiv.innerHTML += `
-                        <input type="radio" id="${inputId}" name="${groupName}" value="${option}">
-                        <label for="${inputId}">${option}</label><br>
-                    `;
-                });
-
-                questionBox.appendChild(questionDiv);
+            currentQuestion.options.forEach(optionText => {
+                let button = document.createElement("button");
+                button.innerText = optionText;
+                button.classList.add("option");
+                button.onclick = function() {
+                    document.querySelectorAll(".option").forEach(btn => btn.classList.remove("selected"));
+                    button.classList.add("selected");
+                    selectedOption = optionText;
+                };
+                optionsContainer.appendChild(button);
             });
         }
 
-        document.getElementById("submitBtn").addEventListener("click", () => {
-            alert("✅ Quiz Submitted!");
+        document.getElementById("submitBtn").addEventListener("click", function() {
+            if (!selectedOption) {
+                alert("Please select an option!");
+                return;
+            }
+
+            let currentQuestion = questions[currentQuestionIndex];
+            if (selectedOption === currentQuestion.correctAnswer) {
+                score++;
+            }
+
+            currentQuestionIndex++;
+            selectedOption = null;
+            displayQuestion();
         });
+
+        loadQuestions();
     </script>
 </body>
 </html>

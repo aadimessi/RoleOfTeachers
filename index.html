@@ -5,36 +5,37 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz</title>
     <style>
-        .selected {
-            background-color: lightblue;
-            font-weight: bold;
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
         }
         #quizSection {
             display: none;
-            text-align: center;
         }
         .question {
             font-size: 20px;
             font-weight: bold;
+            margin-bottom: 10px;
         }
         #questionContainer {
             display: none;
+            text-align: left;
+            width: 50%;
+            margin: 0 auto;
         }
-        .option-container {
+        .options-container {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .option {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 5px;
         }
-        .option-container input {
-            margin: 0;
-            width: 20px;
-            height: 20px;
-        }
-        .option-container label {
-            flex: 1;
-            text-align: left;
-            cursor: pointer;
+        .selected {
+            background-color: lightblue;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -128,19 +129,20 @@
             questionContainer.style.display = "block";
 
             const { index, question, options } = questionsData[currentQuestionIndex];
-            let questionHTML = `<p class='question'>${index}. ${question}</p>`;
+            let questionHTML = `<p class='question'>${index}. ${question}</p><div class="options-container">`;
             const groupName = `question_${index}`;
 
             options.forEach((option, optionIndex) => {
                 const inputId = `q${index}_opt${optionIndex}`;
                 questionHTML += `
-                    <div class="option-container">
+                    <div class="option">
                         <input type="radio" id="${inputId}" name="${groupName}" value="${option}">
                         <label for="${inputId}" onclick="highlightSelection('${groupName}', '${inputId}')">${option}</label>
                     </div>
                 `;
             });
 
+            questionHTML += `</div>`;
             questionContainer.innerHTML = questionHTML;
             submitBtn.style.display = "block";
         }
@@ -154,7 +156,9 @@
                 return;
             }
 
+            // Store answer
             studentAnswers[currentQuestion.index] = selectedOption.value;
+
             currentQuestionIndex++;
             displayQuestion();
         });
@@ -179,6 +183,14 @@
                 <strong>Score: ${correctCount}/${totalQuestions}</strong> <br>
                 ✅ Correct Answers: ${correctCount} <br>
                 ❌ Incorrect Answers: ${incorrectCount}`;
+        }
+
+        window.highlightSelection = function(groupName, inputId) {
+            document.querySelectorAll(`input[name="${groupName}"]`).forEach(input => {
+                const label = document.querySelector(`label[for="${input.id}"]`);
+                label.classList.remove("selected");
+            });
+            document.querySelector(`label[for="${inputId}"]`).classList.add("selected");
         }
     </script>
 </body>

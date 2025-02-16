@@ -4,8 +4,12 @@ let selectedOption = null;
 let score = 0;
 
 function loadQuestion() {
+    console.log("Loading Question:", currentQuestionIndex); // Debugging
+
     if (questions.length === 0) {
-        document.querySelector(".quiz-container").innerHTML = `<h2>No questions available. Please ask your teacher to set the questions.</h2>`;
+        document.querySelector(".quiz-container").innerHTML = `
+            <h2>No questions available. Please ask your teacher to set the questions.</h2>
+        `;
         return;
     }
 
@@ -15,9 +19,18 @@ function loadQuestion() {
     }
 
     let currentQuestion = questions[currentQuestionIndex];
-    document.getElementById('question').innerText = currentQuestion.question;
-    
+
+    // ✅ Make sure the question container exists
+    let questionElement = document.getElementById('question');
     let optionsContainer = document.getElementById('options');
+    
+    if (!questionElement || !optionsContainer) {
+        console.error("❌ Missing #question or #options element in HTML.");
+        return;
+    }
+
+    questionElement.innerText = `${currentQuestionIndex + 1}. ${currentQuestion.question}`;
+
     optionsContainer.innerHTML = ""; // Clear previous options
 
     currentQuestion.options.forEach(optionText => {
@@ -45,10 +58,10 @@ function submitAnswer() {
 
     if (selectedOption === currentQuestion.correct) {
         score++;
-        document.getElementById('result').innerText = "Correct!";
+        document.getElementById('result').innerText = "✅ Correct!";
         document.getElementById('result').style.color = "green";
     } else {
-        document.getElementById('result').innerText = `Wrong! The correct answer is ${currentQuestion.correct}`;
+        document.getElementById('result').innerText = `❌ Wrong! The correct answer is: ${currentQuestion.correct}`;
         document.getElementById('result').style.color = "red";
     }
 
@@ -62,18 +75,21 @@ function submitAnswer() {
 
 function showFinalScore() {
     setTimeout(() => {
-        alert(`Quiz Completed!\nYour Score: ${score} / ${questions.length}`);
-        
-        // 🔹 Redirect to another page (optional)
+        alert(`🎉 Quiz Completed!\nYour Score: ${score} / ${questions.length}`);
+
+        // Optional: Redirect to another page
         window.location.href = "thankyou.html";  
 
-        // 🔹 Force close using browser interaction
+        // Optional: Close the window (depends on browser settings)
         let userConfirmed = confirm("Click OK to close the page.");
         if (userConfirmed) {
-            window.open('', '_self').close(); // Attempt to close
+            window.open('', '_self').close();
         }
     }, 500);
 }
 
-// Load the first question when the page loads
-window.onload = loadQuestion;
+// Ensure the first question loads when the page loads
+window.onload = function() {
+    console.log("🔄 Initializing Quiz...");
+    loadQuestion();
+};

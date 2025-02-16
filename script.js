@@ -28,7 +28,7 @@ async function loadQuestions() {
     try {
         console.log("🔄 Fetching questions from Firebase...");
 
-        const querySnapshot = await getDocs(collection(db, "quizQuestions"));  // ✅ Use getDocs()
+        const querySnapshot = await getDocs(collection(db, "quizQuestions")).get();  // ✅ Use getDocs()
         
         if (querySnapshot.empty) {
             console.warn("⚠️ No questions found in Firestore.");

@@ -1,11 +1,49 @@
-let questions = JSON.parse(localStorage.getItem("questions")) || [];
+// ✅ Initialize Firebase (Add your Firebase config here)
+const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
+};
 
+// ✅ Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore(); // Get Firestore reference
+
+// ✅ Global variables
+let questions = [];
 let currentQuestionIndex = 0;
 let selectedOption = null;
 let score = 0;
 
+// ✅ Function to fetch questions from Firebase
+async function loadQuestions() {
+    try {
+        console.log("🔄 Fetching questions from Firebase...");
+        
+        const snapshot = await db.collection("quiz_questions").get();
+        if (snapshot.empty) {
+            document.querySelector(".quiz-container").innerHTML = `<h2>No questions available. Please ask your teacher to set the questions.</h2>`;
+            return;
+        }
+
+        // ✅ Store fetched questions in the global array
+        questions = snapshot.docs.map(doc => doc.data());
+        console.log("✅ Fetched Questions:", questions);
+
+        // ✅ Load the first question after fetching
+        currentQuestionIndex = 0;
+        loadQuestion();
+    } catch (error) {
+        console.error("❌ Error fetching questions:", error);
+    }
+}
+
+// ✅ Function to load a question
 function loadQuestion() {
-    console.log("Current Question Index:", currentQuestionIndex); // Debugging
+    console.log("Current Question Index:", currentQuestionIndex);
 
     if (!questions || questions.length === 0) {
         document.querySelector(".quiz-container").innerHTML = `<h2>No questions available. Please ask your teacher to set the questions.</h2>`;
@@ -18,8 +56,7 @@ function loadQuestion() {
     }
 
     let currentQuestion = questions[currentQuestionIndex];
-    
-    // 🔹 Ensure currentQuestion is defined
+
     if (!currentQuestion || !currentQuestion.question) {
         console.error("❌ Error: Question data is missing!", currentQuestion);
         return;
@@ -29,8 +66,8 @@ function loadQuestion() {
     let optionsContainer = document.getElementById('options');
 
     questionElement.innerText = `${currentQuestionIndex + 1}. ${currentQuestion.question}`;
-
     optionsContainer.innerHTML = ""; // Clear previous options
+
     currentQuestion.options.forEach(optionText => {
         let button = document.createElement('button');
         button.innerText = optionText;
@@ -46,6 +83,11 @@ function loadQuestion() {
     document.getElementById('result').innerText = "";
 }
 
+// ✅ Call Firebase function when page loads
+window.onload = function () {
+    console.log("🔄 Initializing Quiz...");
+    loadQuestions(); // 🔥 Fetch from Firebase instead of localStorage
+};
 
 
 

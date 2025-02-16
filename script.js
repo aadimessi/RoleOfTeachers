@@ -22,19 +22,22 @@ let selectedOption = null;
 let score = 0;
 
 // ✅ 3. Fetch Questions from Firestore (Your function here)
+import { getDocs, collection } from "firebase/firestore";  // ✅ Import Firestore functions
+
 async function loadQuestions() {
     try {
         console.log("🔄 Fetching questions from Firebase...");
+
+        const querySnapshot = await getDocs(collection(db, "quiz_questions"));  // ✅ Use getDocs()
         
-        const snapshot = await db.collection("quiz_questions").get();
-        if (snapshot.empty) {
+        if (querySnapshot.empty) {
             console.warn("⚠️ No questions found in Firestore.");
             document.querySelector(".quiz-container").innerHTML = `<h2>No questions available. Please ask your teacher to set the questions.</h2>`;
             return;
         }
 
         // ✅ Store fetched questions in the global array
-        questions = snapshot.docs.map(doc => doc.data());
+        questions = querySnapshot.docs.map(doc => doc.data());
         console.log("✅ Fetched Questions:", questions);
 
         if (questions.length === 0) {

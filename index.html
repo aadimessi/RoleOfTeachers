@@ -13,10 +13,12 @@
             display: none;
             text-align: center;
         }
-        #questionContainer {
-            font-size: 24px;
+        .question {
+            font-size: 20px;
             font-weight: bold;
-            margin-bottom: 20px;
+        }
+        #questionContainer {
+            display: none;
         }
     </style>
 </head>
@@ -29,8 +31,7 @@
     <div id="quizSection">
         <h2>Quiz</h2>
         <div id="questionContainer"></div>
-        <div id="optionsContainer"></div>
-        <button id="submitBtn">Next</button>
+        <button id="submitBtn" style="display:none;">Next</button>
     </div>
 
     <script type="module">
@@ -38,13 +39,13 @@
         import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
-             apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
-             authDomain: "quiz-app-e8d1d.firebaseapp.com",
-             projectId: "quiz-app-e8d1d",
-             storageBucket: "quiz-app-e8d1d.firebasestorage.app",
-             messagingSenderId: "421848385039",
-             appId: "1:421848385039:web:cbb560cf9d839752ce457a",
-             measurementId: "G-MBCSZVWMZP"
+            apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
+            authDomain: "quiz-app-e8d1d.firebaseapp.com",
+            projectId: "quiz-app-e8d1d",
+            storageBucket: "quiz-app-e8d1d.firebasestorage.app",
+            messagingSenderId: "421848385039",
+            appId: "1:421848385039:web:cbb560cf9d839752ce457a",
+            measurementId: "G-MBCSZVWMZP"
         };
 
         const app = initializeApp(firebaseConfig);
@@ -78,8 +79,23 @@
 
         async function loadQuestions() {
             const querySnapshot = await getDocs(collection(db, "quizQuestions"));
-            questionsData = querySnapshot.docs.map(doc => doc.data());
-            displayQuestion();
+            questionsData = [];
+            let questionCounter = 1;
+
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                questionsData.push({
+                    index: questionCounter,
+                    question: data.question,
+                    options: data.options,
+                    correctAnswer: data.correctAnswer
+                });
+                questionCounter++;
+            });
+
+            if (questionsData.length > 0) {
+                displayQuestion();
+            }
         }
 
         function displayQuestion() {
@@ -88,29 +104,39 @@
                 return;
             }
 
-            const questionData = questionsData[currentQuestionIndex];
-            document.getElementById("questionContainer").innerHTML = `${currentQuestionIndex + 1}. ${questionData.question}`;
+            const questionContainer = document.getElementById("questionContainer");
+            const submitBtn = document.getElementById("submitBtn");
+            questionContainer.innerHTML = "";
+            questionContainer.style.display = "block";
 
-            const optionsContainer = document.getElementById("optionsContainer");
-            optionsContainer.innerHTML = "";
-            questionData.options.forEach((option, index) => {
-                const inputId = `q${currentQuestionIndex}_opt${index}`;
-                optionsContainer.innerHTML += `
-                    <input type="radio" id="${inputId}" name="question" value="${option}">
-                    <label for="${inputId}">${option}</label><br>
+            const { index, question, options } = questionsData[currentQuestionIndex];
+            let questionHTML = `<p class='question'>${index}. ${question}</p>`;
+            const groupName = `question_${index}`;
+
+            options.forEach((option, optionIndex) => {
+                const inputId = `q${index}_opt${optionIndex}`;
+                questionHTML += `
+                    <input type="radio" id="${inputId}" name="${groupName}" value="${option}">
+                    <label for="${inputId}" onclick="highlightSelection('${groupName}', '${inputId}')">${option}</label><br>
                 `;
             });
+
+            questionContainer.innerHTML = questionHTML;
+            submitBtn.style.display = "block";
         }
 
         document.getElementById("submitBtn").addEventListener("click", () => {
-            const selectedOption = document.querySelector('input[name="question"]:checked');
-            if (!selectedOption) {
-                alert("⚠️ Please select an answer before proceeding.");
-                return;
-            }
             currentQuestionIndex++;
             displayQuestion();
         });
+
+        window.highlightSelection = function(groupName, inputId) {
+            document.querySelectorAll(`input[name="${groupName}"]`).forEach(input => {
+                const label = document.querySelector(`label[for="${input.id}"]`);
+                label.classList.remove("selected");
+            });
+            document.querySelector(`label[for="${inputId}"]`).classList.add("selected");
+        }
     </script>
 </body>
 </html>

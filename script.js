@@ -29,7 +29,8 @@ function loadQuestion() {
         return;
     }
 
-    questionElement.innerText = `${currentQuestionIndex + 1}. ${currentQuestion.question}`;
+   questionElement.innerText = `Q${currentQuestionIndex + 1} of ${questions.length}: ${currentQuestion.question}`;
+
 
     optionsContainer.innerHTML = ""; // Clear previous options
 

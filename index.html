@@ -20,6 +20,22 @@
         #questionContainer {
             display: none;
         }
+        .option-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 5px;
+        }
+        .option-container input {
+            margin: 0;
+            width: 20px;
+            height: 20px;
+        }
+        .option-container label {
+            flex: 1;
+            text-align: left;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -118,8 +134,10 @@
             options.forEach((option, optionIndex) => {
                 const inputId = `q${index}_opt${optionIndex}`;
                 questionHTML += `
-                    <input type="radio" id="${inputId}" name="${groupName}" value="${option}">
-                    <label for="${inputId}" onclick="highlightSelection('${groupName}', '${inputId}')">${option}</label><br>
+                    <div class="option-container">
+                        <input type="radio" id="${inputId}" name="${groupName}" value="${option}">
+                        <label for="${inputId}" onclick="highlightSelection('${groupName}', '${inputId}')">${option}</label>
+                    </div>
                 `;
             });
 
@@ -136,9 +154,7 @@
                 return;
             }
 
-            // Store answer
             studentAnswers[currentQuestion.index] = selectedOption.value;
-
             currentQuestionIndex++;
             displayQuestion();
         });
@@ -163,14 +179,6 @@
                 <strong>Score: ${correctCount}/${totalQuestions}</strong> <br>
                 ✅ Correct Answers: ${correctCount} <br>
                 ❌ Incorrect Answers: ${incorrectCount}`;
-        }
-
-        window.highlightSelection = function(groupName, inputId) {
-            document.querySelectorAll(`input[name="${groupName}"]`).forEach(input => {
-                const label = document.querySelector(`label[for="${input.id}"]`);
-                label.classList.remove("selected");
-            });
-            document.querySelector(`label[for="${inputId}"]`).classList.add("selected");
         }
     </script>
 </body>

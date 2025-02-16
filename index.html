@@ -19,13 +19,14 @@
         }
         #questionContainer {
             display: none;
-            text-align: left;
+            text-align: center;
             width: 50%;
             margin: 0 auto;
         }
         .options-container {
             display: flex;
             flex-direction: column;
+            align-items: center;
             gap: 10px;
         }
         .option {
@@ -37,6 +38,11 @@
             background-color: lightblue;
             font-weight: bold;
         }
+        .timer {
+            font-size: 18px;
+            color: red;
+            margin-bottom: 10px;
+        }
     </style>
 </head>
 <body>
@@ -47,6 +53,7 @@
 
     <div id="quizSection">
         <h2>Quiz</h2>
+        <div id="timer" class="timer"></div>
         <div id="questionContainer"></div>
         <button id="submitBtn" style="display:none;">Next</button>
         <h3 id="result" style="display:none;"></h3>
@@ -56,15 +63,7 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
-            authDomain: "quiz-app-e8d1d.firebaseapp.com",
-            projectId: "quiz-app-e8d1d",
-            storageBucket: "quiz-app-e8d1d.firebasestorage.app",
-            messagingSenderId: "421848385039",
-            appId: "1:421848385039:web:cbb560cf9d839752ce457a",
-            measurementId: "G-MBCSZVWMZP"
-        };
+        const firebaseConfig = { /* Firebase Config Here */ };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
@@ -72,6 +71,7 @@
         let questionsData = [];
         let currentQuestionIndex = 0;
         let studentAnswers = {};
+        let timerInterval;
 
         document.getElementById("loginBtn").addEventListener("click", async () => {
             const studentName = document.getElementById("studentName").value.trim();
@@ -106,15 +106,13 @@
                 questionsData.push({
                     index: questionCounter,
                     question: data.question,
-                    options: data.options,
+                    options: shuffleArray(data.options),
                     correctAnswer: data.correctAnswer
                 });
                 questionCounter++;
             });
-
-            if (questionsData.length > 0) {
-                displayQuestion();
-            }
+            questionsData = shuffleArray(questionsData);
+            displayQuestion();
         }
 
         function displayQuestion() {
@@ -123,8 +121,10 @@
                 return;
             }
 
+            clearInterval(timerInterval);
+            startTimer(30);
+
             const questionContainer = document.getElementById("questionContainer");
-            const submitBtn = document.getElementById("submitBtn");
             questionContainer.innerHTML = "";
             questionContainer.style.display = "block";
 
@@ -141,10 +141,9 @@
                     </div>
                 `;
             });
-
             questionHTML += `</div>`;
             questionContainer.innerHTML = questionHTML;
-            submitBtn.style.display = "block";
+            document.getElementById("submitBtn").style.display = "block";
         }
 
         document.getElementById("submitBtn").addEventListener("click", () => {
@@ -155,42 +154,41 @@
                 alert("⚠️ Please select an answer before proceeding.");
                 return;
             }
-
-            // Store answer
             studentAnswers[currentQuestion.index] = selectedOption.value;
-
             currentQuestionIndex++;
             displayQuestion();
         });
 
         function calculateScore() {
             let correctCount = 0;
-            let incorrectCount = 0;
-
             questionsData.forEach(({ index, correctAnswer }) => {
                 if (studentAnswers[index] === correctAnswer) {
                     correctCount++;
-                } else {
-                    incorrectCount++;
                 }
             });
-
-            const totalQuestions = questionsData.length;
             document.getElementById("questionContainer").style.display = "none";
             document.getElementById("submitBtn").style.display = "none";
             document.getElementById("result").style.display = "block";
-            document.getElementById("result").innerHTML = `✅ Quiz Completed! <br> 
-                <strong>Score: ${correctCount}/${totalQuestions}</strong> <br>
-                ✅ Correct Answers: ${correctCount} <br>
-                ❌ Incorrect Answers: ${incorrectCount}`;
+            document.getElementById("result").innerHTML = `✅ Quiz Completed! <br> Score: ${correctCount}/${questionsData.length}`;
         }
 
-        window.highlightSelection = function(groupName, inputId) {
-            document.querySelectorAll(`input[name="${groupName}"]`).forEach(input => {
-                const label = document.querySelector(`label[for="${input.id}"]`);
-                label.classList.remove("selected");
-            });
-            document.querySelector(`label[for="${inputId}"]`).classList.add("selected");
+        function startTimer(seconds) {
+            const timerDisplay = document.getElementById("timer");
+            let timeLeft = seconds;
+            timerDisplay.innerHTML = `Time Left: ${timeLeft}s`;
+
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerDisplay.innerHTML = `Time Left: ${timeLeft}s`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById("submitBtn").click();
+                }
+            }, 1000);
+        }
+
+        function shuffleArray(array) {
+            return array.sort(() => Math.random() - 0.5);
         }
     </script>
 </body>

@@ -1,3 +1,4 @@
+/* General Page Layout */
 body {
     font-family: Arial, sans-serif;
     display: flex;
@@ -8,6 +9,7 @@ body {
     margin: 0;
 }
 
+/* Main Quiz Container */
 .quiz-container {
     background: white;
     padding: 20px;
@@ -15,16 +17,17 @@ body {
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     text-align: center;
     width: 80%;
-    max-width: 500px;
+    max-width: 600px;
 }
 
-/* Input fields and buttons */
+/* Input Fields & Button */
 input, button {
     width: 90%;
     padding: 10px;
-    margin: 5px 0;
+    margin: 10px 0;
     border: 1px solid #ccc;
     border-radius: 5px;
+    font-size: 16px;
 }
 
 button {
@@ -32,6 +35,7 @@ button {
     color: white;
     border: none;
     cursor: pointer;
+    font-size: 16px;
 }
 
 button:hover {
@@ -43,10 +47,9 @@ button:hover {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
     text-align: center;
     width: 90%;
-    max-width: 500px;
+    max-width: 600px;
     margin: 20px auto;
     padding: 20px;
     border: 2px solid #ccc;
@@ -59,6 +62,7 @@ button:hover {
     font-size: 22px;
     font-weight: bold;
     margin-bottom: 15px;
+    text-align: center;
 }
 
 /* Options Styling */
@@ -66,22 +70,23 @@ button:hover {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
     width: 100%;
+    gap: 10px;
 }
 
 .option {
     display: flex;
     align-items: center;
-    gap: 10px;
+    justify-content: flex-start;
     width: 100%;
-    max-width: 300px;
+    max-width: 350px;
     background: #007bff;
     color: white;
     padding: 10px;
     border-radius: 5px;
     cursor: pointer;
     transition: 0.3s ease-in-out;
+    text-align: left;
 }
 
 .option:hover {
@@ -93,10 +98,11 @@ button:hover {
 }
 
 .option label {
-    width: 100%;
     cursor: pointer;
+    width: 100%;
 }
 
+/* Selected Option Styling */
 .option.selected {
     background: #28a745;
 }
@@ -107,4 +113,12 @@ button:hover {
     font-weight: bold;
     color: red;
     margin-bottom: 10px;
+}
+
+/* Submit Button */
+#submitBtn {
+    width: 100%;
+    max-width: 200px;
+    padding: 10px;
+    margin-top: 15px;
 }

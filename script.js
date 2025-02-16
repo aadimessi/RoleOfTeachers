@@ -1,7 +1,9 @@
 let questions = JSON.parse(localStorage.getItem("questions")) || [];
-if (!Array.isArray(questions)) {
-    console.error("❌ questions is not an array!");
-    questions = []; // Reset to empty array
+
+if (!questions || questions.length === 0) {
+    console.log("⚠️ No questions found in localStorage!");
+} else {
+    console.log("✅ Questions loaded successfully:", questions);
 }
 
 let currentQuestionIndex = 0;

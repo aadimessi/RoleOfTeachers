@@ -5,22 +5,61 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz</title>
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 50%;
+            margin: auto;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: #333;
+        }
+        .question {
+            font-size: 24px; /* Bigger font for better visibility */
+            font-weight: bold;
+            margin-top: 20px;
+        }
+        .options {
+            font-size: 20px;
+            margin: 10px 0;
+        }
+        label {
+            display: block;
+            margin: 10px;
+            padding: 10px;
+            background: #e0e0e0;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 20px;
+        }
+        label:hover {
+            background: lightblue;
+        }
         .selected {
             background-color: lightblue;
             font-weight: bold;
         }
         #quizSection {
-            display: none; /* Initially hide quiz section */
+            display: none;
         }
     </style>
 </head>
 <body>
-    <h2>Student Login</h2>
-    <input type="text" id="studentName" placeholder="Enter your name"><br>
-    <input type="text" id="studentID" placeholder="Enter your ID"><br>
-    <button id="loginBtn">Start Quiz</button>
+    <div class="container">
+        <h2>Student Login</h2>
+        <input type="text" id="studentName" placeholder="Enter your name"><br><br>
+        <input type="text" id="studentID" placeholder="Enter your ID"><br><br>
+        <button id="loginBtn">Start Quiz</button>
+    </div>
 
-    <div id="quizSection">
+    <div class="container" id="quizSection">
         <h2>Quiz</h2>
         <div id="quizContainer"></div>
         <button id="submitBtn">Submit</button>
@@ -30,7 +69,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        // 🔹 Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
             authDomain: "quiz-app-e8d1d.firebaseapp.com",
@@ -47,7 +85,6 @@
         let questionsData = [];
         let questionIds = new Set();
 
-        // 🔹 Student Login & Verification
         document.getElementById("loginBtn").addEventListener("click", async () => {
             const studentName = document.getElementById("studentName").value.trim();
             const studentID = document.getElementById("studentID").value.trim();
@@ -70,7 +107,7 @@
                 }
 
                 console.log("✅ Student verified! Loading quiz...");
-                document.getElementById("quizSection").style.display = "block"; // Show quiz section
+                document.getElementById("quizSection").style.display = "block"; 
                 document.getElementById("loginBtn").disabled = true;
                 loadQuestions();
             } catch (error) {
@@ -103,18 +140,33 @@
                     });
 
                     const questionDiv = document.createElement("div");
-                    questionDiv.innerHTML = `<p><strong>${questionIndex + 1}. ${data.question}</strong></p>`;
+                    questionDiv.className = "question";
+                    questionDiv.innerHTML = `<p>${questionIndex + 1}. ${data.question}</p>`;
 
+                    const optionsDiv = document.createElement("div");
+                    optionsDiv.className = "options";
                     const groupName = `question_${questionIndex}`;
+                    
                     data.options.forEach((option, optionIndex) => {
                         const inputId = `q${questionIndex}_opt${optionIndex}`;
-                        questionDiv.innerHTML += `
-                            <input type="radio" id="${inputId}" name="${groupName}" value="${option}">
-                            <label for="${inputId}" onclick="highlightSelection('${groupName}', '${inputId}')">${option}</label><br>
-                        `;
+                        const optionLabel = document.createElement("label");
+                        optionLabel.setAttribute("for", inputId);
+                        optionLabel.textContent = option;
+                        optionLabel.onclick = () => highlightSelection(groupName, inputId);
+                        
+                        const radioInput = document.createElement("input");
+                        radioInput.type = "radio";
+                        radioInput.id = inputId;
+                        radioInput.name = groupName;
+                        radioInput.value = option;
+                        radioInput.style.display = "none";
+
+                        optionsDiv.appendChild(radioInput);
+                        optionsDiv.appendChild(optionLabel);
                     });
 
                     quizContainer.appendChild(questionDiv);
+                    quizContainer.appendChild(optionsDiv);
                 });
 
                 console.log("✅ Questions loaded successfully!");

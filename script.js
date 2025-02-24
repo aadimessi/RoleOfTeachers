@@ -88,7 +88,6 @@ function loadQuestion() {
     document.getElementById('result').innerText = "";
 }
 
-// ✅ 3. Check the Answer
 function checkAnswer() {
     let currentQuestion = questions[currentQuestionIndex];
 
@@ -97,10 +96,17 @@ function checkAnswer() {
         return;
     }
 
-    console.log("🚀 Selected Option:", selectedOption);
-    console.log("🏆 Correct Answer:", currentQuestion.correctAnswer);
+    console.log("🚀 Selected Option (raw):", selectedOption);
+    console.log("🏆 Correct Answer (raw):", currentQuestion.correctAnswer);
 
-    if (selectedOption === currentQuestion.correctAnswer) {
+    // Normalize strings: trim spaces and make them lowercase
+    let normalizedSelectedOption = selectedOption.trim().toLowerCase();
+    let normalizedCorrectAnswer = currentQuestion.correctAnswer.trim().toLowerCase();
+
+    console.log("🔍 Selected Option (normalized):", normalizedSelectedOption);
+    console.log("✅ Correct Answer (normalized):", normalizedCorrectAnswer);
+
+    if (normalizedSelectedOption === normalizedCorrectAnswer) {
         score++;
         console.log("🎉 Correct!");
     } else {
@@ -115,6 +121,7 @@ function checkAnswer() {
         showFinalScore();
     }
 }
+
 
 // ✅ 4. Show Final Score
 function showFinalScore() {

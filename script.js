@@ -1,3 +1,4 @@
+console.log("✅ Quiz script loaded!");
 // ✅ Firebase Configuration
 const firebaseConfig = {
             apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
@@ -12,6 +13,7 @@ const firebaseConfig = {
 // ✅ Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
+console.log("✅ Firebase initialized!");
 
 let questions = [];
 let currentQuestionIndex = 0;
@@ -20,6 +22,8 @@ let score = 0;
 
 // ✅ 1. Load Questions from Firestore
 async function loadQuestions() {
+            console.log("🔍 loadQuestions function called!");
+
     try {
         console.log("🔄 Fetching questions from Firebase...");
         

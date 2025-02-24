@@ -106,6 +106,7 @@ function checkAnswer() {
 
     console.log("🚀 Selected Option:", selectedOption);
     console.log("🏆 Correct Answer:", currentQuestion.correctAnswer);
+    console.log("🔎 Are they equal?", selectedOption === currentQuestion.correctAnswer);        
 
     if (selectedOption === currentQuestion.correctAnswer) {
         score++;

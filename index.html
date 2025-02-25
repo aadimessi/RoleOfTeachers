@@ -256,7 +256,7 @@
         const question = questionsData[i];
 
         // Check if the student's answer matches the correct answer
-        if (studentAnswers[question.index] === question.correctAnswer) {
+        if (studentAnswers[currentQuestionIndex] === question.correctAnswer) {
             correctCount++;  // Increment count for correct answers
         }
     }

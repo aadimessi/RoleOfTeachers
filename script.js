@@ -112,7 +112,7 @@ function checkAnswer() {
     console.log("🏆 Correct Answer:", currentQuestion.correctAnswer);
     console.log("🔎 Are they equal?", selectedOption === currentQuestion.correctAnswer);        
 
-    if (selectedOption === currentQuestion.correctAnswer) {
+    if (selectedOption == currentQuestion.correctAnswer) {
         score++;
         console.log("🎉 Correct!");
     } else {

@@ -1,140 +1,95 @@
-console.log("✅ Quiz script loaded!");
-// ✅ Firebase Configuration
+// Firebase configuration
 const firebaseConfig = {
-            apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
-            authDomain: "quiz-app-e8d1d.firebaseapp.com",
-            projectId: "quiz-app-e8d1d",
-            storageBucket: "quiz-app-e8d1d.appspot.com",
-            messagingSenderId: "421848385039",
-            appId: "1:421848385039:web:cbb560cf9d839752ce457a",
-            measurementId: "G-MBCSZVWMZP"
+    apiKey: "your-api-key",
+    authDomain: "your-auth-domain",
+    projectId: "your-project-id",
+    storageBucket: "your-storage-bucket",
+    messagingSenderId: "your-messaging-sender-id",
+    appId: "your-app-id"
 };
 
-// ✅ Initialize Firebase
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-console.log("✅ Firebase initialized!");
 
 let questions = [];
 let currentQuestionIndex = 0;
-let selectedOption = null;
-let score = 0;
 
-// ✅ 1. Load Questions from Firestore
-async function loadQuestions() {
-            console.log("🔍 loadQuestions function called!");
-
-    try {
-        console.log("🔄 Fetching questions from Firebase...");
-        
-        const snapshot = await db.collection("quizQuestions").get();
-        
-        if (snapshot.empty) {
-            console.warn("⚠️ No questions found in Firestore.");
-            document.querySelector(".quiz-container").innerHTML = `<h2>No questions available. Please ask your teacher to set the questions.</h2>`;
+// Load questions from Firestore
+function loadQuestions() {
+    db.collection("questions").get().then((querySnapshot) => {
+        if (querySnapshot.empty) {
+            console.error("No questions found in the database.");
+            alert("No questions available. Please add questions in Firestore.");
             return;
         }
-
-        // ✅ Store fetched questions in the global array
-        questions = snapshot.docs.map(doc => doc.data());
-
-        console.log("✅ Fetched Questions:", questions);
-
-        if (questions.length === 0) {
-            console.error("⚠️ Error: No questions were loaded from Firestore.");
-            return;
+        
+        questions = [];
+        querySnapshot.forEach((doc) => {
+            questions.push(doc.data());
+        });
+        
+        if (questions.length > 0) {
+            displayQuestion();
         }
-
-        // ✅ Load the first question
-        currentQuestionIndex = 0;
-        loadQuestion();
-    } catch (error) {
-        console.error("❌ Error fetching questions:", error);
-    }
+    }).catch((error) => {
+        console.error("Error loading questions: ", error);
+    });
 }
 
-// ✅ 2. Load a Question
-function loadQuestion() {
-    console.log("Current Question Index:", currentQuestionIndex);
-
+// Display the current question
+function displayQuestion() {
+    const questionContainer = document.getElementById("question-container");
+    const optionsContainer = document.getElementById("options-container");
+    
     if (!questions || questions.length === 0) {
-        document.querySelector(".quiz-container").innerHTML = `<h2>No questions available. Please ask your teacher to set the questions.</h2>`;
+        console.error("Questions array is empty or undefined.");
+        return;
+    }
+    
+    const currentQuestion = questions[currentQuestionIndex];
+    if (!currentQuestion || !currentQuestion.options) {
+        console.error("Invalid question format or missing options.");
         return;
     }
 
-    if (currentQuestionIndex >= questions.length) {
-        showFinalScore();
-        return;
-    }
+    // Clear previous content
+    questionContainer.innerHTML = currentQuestion.question || "[No question text]";
+    optionsContainer.innerHTML = "";
 
-    let currentQuestion = questions[currentQuestionIndex];
-
-    if (!currentQuestion || !currentQuestion.question) {
-        console.error("❌ Error: Question data is missing!", currentQuestion);
-        return;
-    }
-
-    let questionElement = document.getElementById('question');
-    let optionsContainer = document.getElementById('options');
-
-    questionElement.innerText = `${currentQuestionIndex + 1}. ${currentQuestion.question}`;
-    optionsContainer.innerHTML = ""; // Clear previous options
-    selectedOption = null; // Reset selected option
-
-    currentQuestion.options.forEach(optionText => {
-        let button = document.createElement('button');
-        button.innerText = optionText;
-        button.classList.add('option');
-        
-        button.onclick = function() {
-            document.querySelectorAll('.option').forEach(btn => btn.classList.remove('selected'));
-            button.classList.add('selected');
-            selectedOption = optionText;  // ✅ Capture the selected option
-            console.log("✅ Selected Option:", selectedOption);
-        };
-
+    currentQuestion.options.forEach((option, index) => {
+        const button = document.createElement("button");
+        button.innerText = option;
+        button.classList.add("option-btn");
+        button.onclick = () => checkAnswer(option);
         optionsContainer.appendChild(button);
     });
-
-    document.getElementById('result').innerText = "";
 }
 
-// ✅ 3. Check the Answer
-function checkAnswer() {
-    let currentQuestion = questions[currentQuestionIndex];
-
-    if (!selectedOption) {
-        alert("Please select an option!");
-        return;
-    }
-
-    console.log("🚀 Selected Option:", selectedOption);
-    console.log("🏆 Correct Answer:", currentQuestion.correctAnswer);
-    console.log("🔎 Are they equal?", selectedOption === currentQuestion.correctAnswer);        
-
-    if (selectedOption == currentQuestion.correctAnswer) {
-        score++;
-        console.log("🎉 Correct!");
+// Check the selected answer
+function checkAnswer(selectedOption) {
+    const currentQuestion = questions[currentQuestionIndex];
+    if (selectedOption === currentQuestion.correctAnswer) {
+        alert("Correct!");
     } else {
-        console.log("❌ Incorrect.");
+        alert("Wrong! The correct answer is: " + currentQuestion.correctAnswer);
     }
 
     currentQuestionIndex++;
-
     if (currentQuestionIndex < questions.length) {
-        loadQuestion();
+        displayQuestion();
     } else {
-        showFinalScore();
+        alert("Quiz completed!");
     }
 }
 
-// ✅ 4. Show Final Score
-function showFinalScore() {
-    document.querySelector(".quiz-container").innerHTML = `
-        <h2>Quiz Completed!</h2>
-        <p>Your Score: ${score} / ${questions.length}</p>
-    `;
-}
+// Start the quiz
+window.onload = () => {
+    loadQuestions();
+};
 
-// ✅ Start the quiz
-loadQuestions();
+// HTML example structure:
+// <div id="question-container"></div>
+// <div id="options-container"></div>
+
+// Let me know if you need any adjustments! 🚀

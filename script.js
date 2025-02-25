@@ -1,11 +1,12 @@
 // Firebase configuration
 const firebaseConfig = {
-    apiKey: "your-api-key",
-    authDomain: "your-auth-domain",
-    projectId: "your-project-id",
-    storageBucket: "your-storage-bucket",
-    messagingSenderId: "your-messaging-sender-id",
-    appId: "your-app-id"
+            apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
+            authDomain: "quiz-app-e8d1d.firebaseapp.com",
+            projectId: "quiz-app-e8d1d",
+            storageBucket: "quiz-app-e8d1d.appspot.com",
+            messagingSenderId: "421848385039",
+            appId: "1:421848385039:web:cbb560cf9d839752ce457a",
+            measurementId: "G-MBCSZVWMZP"
 };
 
 // Initialize Firebase

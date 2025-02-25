@@ -154,7 +154,7 @@
         let currentQuestionIndex = 0;
         let studentAnswers = {};
         let timerInterval;
-
+        let index=0;
         document.getElementById("loginBtn").addEventListener("click", async () => {
             const studentName = document.getElementById("studentName").value.trim();
             const studentID = document.getElementById("studentID").value.trim();
@@ -248,11 +248,25 @@
             displayQuestion();
         });
 
-        function calculateScore() {
-            let correctCount = questionsData.filter(q => studentAnswers[q.index] === q.correctAnswer).length;
-            document.getElementById("result").innerHTML = `✅ Quiz Completed! <br> Score: ${correctCount}/${questionsData.length}`;
-            document.getElementById("result").style.display = "block";
+            function calculateScore() {
+    let correctCount = 0;
+
+    // Loop through each question
+    for (let i = 0; i < questionsData.length; i++) {
+        const question = questionsData[i];
+
+        // Check if the student's answer matches the correct answer
+        if (studentAnswers[question.index] === question.correctAnswer) {
+            correctCount++;  // Increment count for correct answers
         }
+    }
+
+    // Show the final score
+    document.getElementById("result").innerHTML = `✅ Quiz Completed! <br> Score: ${correctCount}/${questionsData.length}`;
+    document.getElementById("result").style.display = "block";
+}
+
+        
 
         function shuffleArray(array) {
             return array.sort(() => Math.random() - 0.5);

@@ -133,7 +133,9 @@ h2 {
             }
 
             const studentCollection = collection(db, "students");
-            const q = query(studentCollection, where("id", "==", id));
+            const q = query(studentCollection, where("id", "==", studentID));
+            const q = query(studentCollection, where("name", "==", studentName));
+            
             const querySnapshot = await getDocs(q);
 
             if (querySnapshot.empty) {

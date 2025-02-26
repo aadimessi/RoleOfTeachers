@@ -126,7 +126,8 @@ h2 {
         let questions = [];
         let currentQuestionIndex = 0;
         let score = 0;
-
+        let selectedAnswer = null;
+        
         document.getElementById("loginBtn").addEventListener("click", async () => {
             const studentName = document.getElementById("name").value.trim();
             const studentID = document.getElementById("id").value.trim();
@@ -210,6 +211,7 @@ h2 {
             }
             checkAnswer();
             currentQuestionIndex++;
+            selectedAnswer=null;
             displayQuestion();
         });
 

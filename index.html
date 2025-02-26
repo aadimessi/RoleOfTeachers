@@ -76,8 +76,8 @@
     <!-- Login Section -->
     <div class="container" id="loginSection">
         <h2>Student Login</h2>
-        <input type="text" id="studentName" class="input-field" placeholder="Enter your name">
-        <input type="text" id="studentID" class="input-field" placeholder="Enter your ID">
+        <input type="text" id="name" class="input-field" placeholder="Enter your name">
+        <input type="text" id="id" class="input-field" placeholder="Enter your ID">
         <button id="loginBtn" class="btn">Start Quiz</button>
     </div>
 
@@ -110,8 +110,8 @@
         let score = 0;
 
         document.getElementById("loginBtn").addEventListener("click", async () => {
-            const studentName = document.getElementById("studentName").value.trim();
-            const studentID = document.getElementById("studentID").value.trim();
+            const studentName = document.getElementById("name").value.trim();
+            const studentID = document.getElementById("id").value.trim();
 
             if (!studentName || !studentID) {
                 alert("⚠️ Please enter both Name and ID.");
@@ -119,7 +119,7 @@
             }
 
             const studentCollection = collection(db, "students");
-            const q = query(studentCollection, where("id", "==", studentID));
+            const q = query(studentCollection, where("id", "==", id));
             const querySnapshot = await getDocs(q);
 
             if (querySnapshot.empty) {

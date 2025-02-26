@@ -227,6 +227,26 @@
             submitBtn.style.display = currentQuestionIndex === questions.length - 1 ? "block" : "none";
         }
 
+    document.getElementById("nextBtn").addEventListener("click", () => {
+    if (selectedAnswer === null) {
+        alert("Please select an option before moving to the next question!");
+        return;
+    }
+
+    const currentQuestion = questions[currentQuestionIndex];
+    if (selectedAnswer === currentQuestion.correctAnswer) {
+        score++;
+    }
+
+    currentQuestionIndex++;
+    if (currentQuestionIndex < questions.length) {
+        displayQuestion();
+    } else {
+        submitQuiz();
+    }
+});
+
+        
         function selectAnswer(button, option) {
             selectedAnswer = option;
             document.querySelectorAll(".option-btn").forEach(btn => btn.style.backgroundColor = "#007bff");

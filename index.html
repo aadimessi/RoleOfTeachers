@@ -170,72 +170,87 @@ h2 {
             }
         }
 
-        function displayQuestion() {
-            const questionContainer = document.getElementById("question-container");
-            const optionsContainer = document.getElementById("options-container");
-            const nextBtn = document.getElementById("nextBtn");
-            const submitBtn = document.getElementById("submitBtn");
-            const resultContainer = document.getElementById("result");
+function displayQuestion() {
+    const questionContainer = document.getElementById("question-container");
+    const optionsContainer = document.getElementById("options-container");
+    const nextBtn = document.getElementById("nextBtn");
+    const submitBtn = document.getElementById("submitBtn");
+    const resultContainer = document.getElementById("result");
 
-            resultContainer.innerHTML = "";
-            optionsContainer.innerHTML = "";
-            selectedAnswer = null;
+    resultContainer.innerHTML = "";
+    optionsContainer.innerHTML = "";
+    selectedAnswer = null;
 
-            if (currentQuestionIndex >= questions.length) {
-                return;
-            }
+    if (currentQuestionIndex >= questions.length) {
+        return;
+    }
 
-            const currentQuestion = questions[currentQuestionIndex];
-            questionContainer.innerHTML = `<h2>${currentQuestion.question}</h2>`;
+    const currentQuestion = questions[currentQuestionIndex];
+    questionContainer.innerHTML = `<h2>${currentQuestion.question}</h2>`;
 
-            currentQuestion.options.forEach(option => {
-                const button = document.createElement("button");
-                button.innerText = option;
-                button.classList.add("option-btn");
-                button.onclick = () => selectAnswer(option);
-                optionsContainer.appendChild(button);
-            });
-
-            nextBtn.style.display = currentQuestionIndex < questions.length - 1 ? "block" : "none";
-            submitBtn.style.display = currentQuestionIndex === questions.length - 1 ? "block" : "none";
-        }
-
-            function selectAnswer(option) {
-            selectedAnswer = option;
-        }
-
-        document.getElementById("nextBtn").addEventListener("click", () => {
-            if (selectedAnswer === null) {
-                alert("Please select an option before proceeding!");
-                return;
-            }
-            checkAnswer();
-            currentQuestionIndex++;
-            selectedAnswer=null;
-            displayQuestion();
-        });
-
-        document.getElementById("submitBtn").addEventListener("click", () => {
-            if (selectedAnswer === null) {
-                alert("Please select an option before submitting!");
-                return;
-            }
-            checkAnswer();
-            showResult();
-        });
+    currentQuestion.options.forEach(option => {
+        const button = document.createElement("button");
+        button.innerText = option;
+        button.classList.add("option-btn");
         
-        function checkAnswer(selectedOption) {
-            const currentQuestion = questions[currentQuestionIndex];
-            if (selectedOption === currentQuestion.correctAnswer) {
-                score++;
-            }
-            currentQuestionIndex++;
-            displayQuestion();
-        }
+        button.onclick = () => selectAnswer(button, option);
 
-        function showResult() {
-            document.getElementById("quizSection").innerHTML = `<h2>Quiz Completed!</h2><p>Your Score: ${score} / ${questions.length}</p>`;
-        }
+        optionsContainer.appendChild(button);
+    });
+
+    nextBtn.style.display = currentQuestionIndex < questions.length - 1 ? "block" : "none";
+    submitBtn.style.display = currentQuestionIndex === questions.length - 1 ? "block" : "none";
+}
+
+// Function to handle answer selection and highlight the chosen option
+function selectAnswer(button, option) {
+    selectedAnswer = option;
+
+    // Remove green from all buttons
+    const optionButtons = document.querySelectorAll(".option-btn");
+    optionButtons.forEach(btn => btn.style.backgroundColor = "#007bff");
+
+    // Highlight the selected option in green
+    button.style.backgroundColor = "#28a745";
+}
+
+// Handle "Next" button click
+document.getElementById("nextBtn").addEventListener("click", () => {
+    if (selectedAnswer === null) {
+        alert("Please select an option before proceeding!");
+        return;
+    }
+    checkAnswer();
+    currentQuestionIndex++; // Only increment here, not in checkAnswer
+    displayQuestion();
+});
+
+// Handle "Submit" button click
+document.getElementById("submitBtn").addEventListener("click", () => {
+    if (selectedAnswer === null) {
+        alert("Please select an option before submitting!");
+        return;
+    }
+    checkAnswer();
+    showResult();
+});
+
+// Check if the selected answer is correct
+function checkAnswer() {
+    const currentQuestion = questions[currentQuestionIndex];
+    if (selectedAnswer === currentQuestion.correctAnswer) {
+        score++;
+    }
+}
+
+// Show the final result
+function showResult() {
+    document.getElementById("quizSection").innerHTML = `
+        <h2>Quiz Completed!</h2>
+        <p>Your Score: ${score} / ${questions.length}</p>
+    `;
+}
+
         
     </script>
 

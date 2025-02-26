@@ -172,28 +172,56 @@ h2 {
         function displayQuestion() {
             const questionContainer = document.getElementById("question-container");
             const optionsContainer = document.getElementById("options-container");
+            const nextBtn = document.getElementById("nextBtn");
+            const submitBtn = document.getElementById("submitBtn");
             const resultContainer = document.getElementById("result");
 
+            resultContainer.innerHTML = "";
+            optionsContainer.innerHTML = "";
+            selectedAnswer = null;
+
             if (currentQuestionIndex >= questions.length) {
-                resultContainer.innerHTML = `<h2>Quiz Completed!</h2><p>Your Score: ${score} / ${questions.length}</p>`;
-                questionContainer.innerHTML = "";
-                optionsContainer.innerHTML = "";
                 return;
             }
 
             const currentQuestion = questions[currentQuestionIndex];
             questionContainer.innerHTML = `<h2>${currentQuestion.question}</h2>`;
-            optionsContainer.innerHTML = "";
 
             currentQuestion.options.forEach(option => {
                 const button = document.createElement("button");
                 button.innerText = option;
                 button.classList.add("option-btn");
-                button.onclick = () => checkAnswer(option);
+                button.onclick = () => selectAnswer(option);
                 optionsContainer.appendChild(button);
             });
+
+            nextBtn.style.display = currentQuestionIndex < questions.length - 1 ? "block" : "none";
+            submitBtn.style.display = currentQuestionIndex === questions.length - 1 ? "block" : "none";
         }
 
+            function selectAnswer(option) {
+            selectedAnswer = option;
+        }
+
+        document.getElementById("nextBtn").addEventListener("click", () => {
+            if (selectedAnswer === null) {
+                alert("Please select an option before proceeding!");
+                return;
+            }
+            checkAnswer();
+            currentQuestionIndex++;
+            displayQuestion();
+        });
+
+        document.getElementById("submitBtn").addEventListener("click", () => {
+            if (selectedAnswer === null) {
+                alert("Please select an option before submitting!");
+                return;
+            }
+            checkAnswer();
+            showResult();
+        });
+        
         function checkAnswer(selectedOption) {
             const currentQuestion = questions[currentQuestionIndex];
             if (selectedOption === currentQuestion.correctAnswer) {
@@ -202,6 +230,11 @@ h2 {
             currentQuestionIndex++;
             displayQuestion();
         }
+
+        function showResult() {
+            document.getElementById("quizSection").innerHTML = `<h2>Quiz Completed!</h2><p>Your Score: ${score} / ${questions.length}</p>`;
+        }
+        
     </script>
 
 </body>

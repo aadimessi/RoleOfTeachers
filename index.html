@@ -17,30 +17,28 @@
             text-align: center;
         }
 
-    .container {
-    width: 50%; /* Use most of the screen width */
-    max-width: 1400px; /* Set a bigger max width */
-    padding: 50px;
-    background-color: #fff;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-}
+        .container {
+            width: 50%;
+            max-width: 1400px;
+            padding: 50px;
+            background-color: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
 
+        h1 {
+            font-size: 3rem;
+        }
 
-h1 {
-    font-size: 3rem;
-}
+        h2 {
+            font-size: 2rem;
+        }
 
-h2 {
-    font-size: 2rem;
-}
-
-.option-btn {
-    font-size: 1.5rem;
-    padding: 15px;
-    margin: 10px 0;
-}
-
+        .option-btn {
+            font-size: 1.5rem;
+            padding: 15px;
+            margin: 10px 0;
+        }
 
         .input-field {
             width: 100%;
@@ -85,6 +83,12 @@ h2 {
         #quizSection {
             display: none;
         }
+
+        #timer {
+            font-size: 1.5rem;
+            color: #ff0000;
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
@@ -100,6 +104,7 @@ h2 {
     <!-- Quiz Section -->
     <div class="container" id="quizSection">
         <h1>Quiz</h1>
+        <div id="timer">Time Left: 60m 0s</div> <!-- Timer added -->
         <div id="question-container"></div>
         <div id="options-container"></div>
         <button id="nextBtn" class="btn" style="display: none;">Next</button>
@@ -127,7 +132,28 @@ h2 {
         let currentQuestionIndex = 0;
         let score = 0;
         let selectedAnswer = null;
-        
+        let timerInterval;
+
+        // Start the timer function
+        function startTimer(durationInMinutes) {
+            const timerDisplay = document.getElementById("timer");
+            let timeLeft = durationInMinutes * 60;
+
+            timerInterval = setInterval(() => {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+
+                timerDisplay.innerText = `Time Left: ${minutes}m ${seconds}s`;
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert("Time's up! Submitting your answers automatically.");
+                    submitQuiz();
+                }
+                timeLeft--;
+            }, 1000);
+        }
+
         document.getElementById("loginBtn").addEventListener("click", async () => {
             const studentName = document.getElementById("name").value.trim();
             const studentID = document.getElementById("id").value.trim();
@@ -138,9 +164,7 @@ h2 {
             }
 
             const studentCollection = collection(db, "students");
-            const q = query(studentCollection, 
-               where("id", "==", studentID), 
-               where("name", "==", studentName));
+            const q = query(studentCollection, where("id", "==", studentID), where("name", "==", studentName));
 
             const querySnapshot = await getDocs(q);
 
@@ -151,7 +175,9 @@ h2 {
 
             document.getElementById("loginSection").style.display = "none";
             document.getElementById("quizSection").style.display = "block";
+
             loadQuestions();
+            startTimer(60); // Start the 1-hour timer
         });
 
         async function loadQuestions() {
@@ -170,88 +196,54 @@ h2 {
             }
         }
 
-function displayQuestion() {
-    const questionContainer = document.getElementById("question-container");
-    const optionsContainer = document.getElementById("options-container");
-    const nextBtn = document.getElementById("nextBtn");
-    const submitBtn = document.getElementById("submitBtn");
-    const resultContainer = document.getElementById("result");
+        function displayQuestion() {
+            const questionContainer = document.getElementById("question-container");
+            const optionsContainer = document.getElementById("options-container");
+            const nextBtn = document.getElementById("nextBtn");
+            const submitBtn = document.getElementById("submitBtn");
+            const resultContainer = document.getElementById("result");
 
-    resultContainer.innerHTML = "";
-    optionsContainer.innerHTML = "";
-    selectedAnswer = null;
+            resultContainer.innerHTML = "";
+            optionsContainer.innerHTML = "";
+            selectedAnswer = null;
 
-    if (currentQuestionIndex >= questions.length) {
-        return;
-    }
+            if (currentQuestionIndex >= questions.length) {
+                return;
+            }
 
-    const currentQuestion = questions[currentQuestionIndex];
-    questionContainer.innerHTML = `<h2>${currentQuestion.question}</h2>`;
+            const currentQuestion = questions[currentQuestionIndex];
+            questionContainer.innerHTML = `<h2>${currentQuestion.question}</h2>`;
 
-    currentQuestion.options.forEach(option => {
-        const button = document.createElement("button");
-        button.innerText = option;
-        button.classList.add("option-btn");
-        
-        button.onclick = () => selectAnswer(button, option);
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement("button");
+                button.innerText = option;
+                button.classList.add("option-btn");
 
-        optionsContainer.appendChild(button);
-    });
+                button.onclick = () => selectAnswer(button, option);
+                optionsContainer.appendChild(button);
+            });
 
-    nextBtn.style.display = currentQuestionIndex < questions.length - 1 ? "block" : "none";
-    submitBtn.style.display = currentQuestionIndex === questions.length - 1 ? "block" : "none";
-}
+            nextBtn.style.display = currentQuestionIndex < questions.length - 1 ? "block" : "none";
+            submitBtn.style.display = currentQuestionIndex === questions.length - 1 ? "block" : "none";
+        }
 
-// Function to handle answer selection and highlight the chosen option
-function selectAnswer(button, option) {
-    selectedAnswer = option;
+        function selectAnswer(button, option) {
+            selectedAnswer = option;
+            document.querySelectorAll(".option-btn").forEach(btn => btn.style.backgroundColor = "#007bff");
+            button.style.backgroundColor = "#28a745";
+        }
 
-    // Remove green from all buttons
-    const optionButtons = document.querySelectorAll(".option-btn");
-    optionButtons.forEach(btn => btn.style.backgroundColor = "#007bff");
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            showResult();
+        }
 
-    // Highlight the selected option in green
-    button.style.backgroundColor = "#28a745";
-}
-
-// Handle "Next" button click
-document.getElementById("nextBtn").addEventListener("click", () => {
-    if (selectedAnswer === null) {
-        alert("Please select an option before proceeding!");
-        return;
-    }
-    checkAnswer();
-    currentQuestionIndex++; // Only increment here, not in checkAnswer
-    displayQuestion();
-});
-
-// Handle "Submit" button click
-document.getElementById("submitBtn").addEventListener("click", () => {
-    if (selectedAnswer === null) {
-        alert("Please select an option before submitting!");
-        return;
-    }
-    checkAnswer();
-    showResult();
-});
-
-// Check if the selected answer is correct
-function checkAnswer() {
-    const currentQuestion = questions[currentQuestionIndex];
-    if (selectedAnswer === currentQuestion.correctAnswer) {
-        score++;
-    }
-}
-
-// Show the final result
-function showResult() {
-    document.getElementById("quizSection").innerHTML = `
-        <h2>Quiz Completed!</h2>
-        <p>Your Score: ${score} / ${questions.length}</p>
-    `;
-}
-
-        
+        function showResult() {
+            document.getElementById("quizSection").innerHTML = `
+                <h2>Quiz Completed!</h2>
+                <p>Your Score: ${score} / ${questions.length}</p>
+            `;
+        }
     </script>
 
 </body>

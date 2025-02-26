@@ -246,6 +246,20 @@
     }
 });
 
+        document.getElementById("submitBtn").addEventListener("click", () => {
+    if (selectedAnswer === null) {
+        alert("Please select an option before submitting!");
+        return;
+    }
+
+    const currentQuestion = questions[currentQuestionIndex];
+    if (selectedAnswer === currentQuestion.correctAnswer) {
+        score++;
+    }
+
+    submitQuiz();
+});
+
         
         function selectAnswer(button, option) {
             selectedAnswer = option;

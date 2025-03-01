@@ -273,9 +273,36 @@
 
         function submitQuiz() {
             clearInterval(timerInterval);
+
+            saveResult();
+            
             showResult();
         }
 
+    async function saveResult() {
+    const studentName = document.getElementById("name").value.trim();
+    const studentID = document.getElementById("id").value.trim();
+
+    if (!studentName || !studentID) return;
+
+    const resultRef = collection(db, "quizResults");
+    const resultData = {
+        name: studentName,
+        id: studentID,
+        score: score,
+        totalQuestions: questions.length,
+        timestamp: new Date()
+    };
+
+    try {
+        await addDoc(resultRef, resultData);
+        console.log("Quiz result saved successfully!");
+    } catch (error) {
+        console.error("Error saving quiz result: ", error);
+    }
+}
+
+        
         function showResult() {
             document.getElementById("quizSection").innerHTML = `
                 <h2>Quiz Completed!</h2>

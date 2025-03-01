@@ -282,7 +282,7 @@ async function submitQuiz() {
 
     // Save the score in Firestore with studentID as the document ID
     try {
-        await setDoc(doc(db, "quizResults", studentID), {
+        await setDoc(doc(db, "quizResults", studentName), {
             name: studentName,
             score: score,
             totalQuestions: questions.length,

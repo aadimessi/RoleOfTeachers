@@ -271,13 +271,30 @@
             button.style.backgroundColor = "#28a745";
         }
 
-        function submitQuiz() {
-            clearInterval(timerInterval);
+    import { doc, setDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-            saveResult();
-            
-            showResult();
-        }
+async function submitQuiz() {
+    clearInterval(timerInterval); // Stop the timer
+
+    // Get the student's details
+    const studentName = document.getElementById("name").value.trim();
+    const studentID = document.getElementById("id").value.trim();
+
+    // Save the score in Firestore with studentID as the document ID
+    try {
+        await setDoc(doc(db, "quizResults", studentID), {
+            name: studentName,
+            score: score,
+            totalQuestions: questions.length,
+            timestamp: new Date()
+        });
+
+        showResult(); // Show the final score on the screen
+    } catch (error) {
+        console.error("❌ Error saving score:", error);
+    }
+}
+
 
     async function saveResult() {
     const studentName = document.getElementById("name").value.trim();

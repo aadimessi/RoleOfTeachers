@@ -178,7 +178,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     }
 
     // ✅ Check if student already submitted the quiz
-    const resultDocRef = doc(db, "quizResults", studentID); // Use the existing 'doc' function
+    const resultDocRef = doc(db, "quizResults", studentID); 
     const resultDoc = await getDoc(resultDocRef);
 
     if (resultDoc.exists()) {
@@ -193,6 +193,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     loadQuestions();
     startTimer(60); // Start the 1-hour timer
 });
+
 
         async function loadQuestions() {
             try {

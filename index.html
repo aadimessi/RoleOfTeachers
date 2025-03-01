@@ -178,7 +178,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     }
 
     // ✅ Check if student already submitted the quiz
-    const resultDocRef = doc(db, "quizResults", studentID); 
+    const resultDocRef = doc(db, "quizResults", studentName); 
     const resultDoc = await getDoc(resultDocRef);
 
     if (resultDoc.exists()) {

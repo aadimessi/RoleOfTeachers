@@ -158,8 +158,6 @@
             }, 1000);
         }
 
-import { getDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
 document.getElementById("loginBtn").addEventListener("click", async () => {
     const studentName = document.getElementById("name").value.trim();
     const studentID = document.getElementById("id").value.trim();
@@ -180,7 +178,8 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     }
 
     // ✅ Check if student already submitted the quiz
-    const resultDoc = await getDoc(doc(db, "quizResults", studentID));
+    const resultDocRef = doc(db, "quizResults", studentID); // Use the existing 'doc' function
+    const resultDoc = await getDoc(resultDocRef);
 
     if (resultDoc.exists()) {
         alert("✅ You have already completed the quiz! Your score is saved.");
@@ -194,7 +193,6 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
     loadQuestions();
     startTimer(60); // Start the 1-hour timer
 });
-
 
         async function loadQuestions() {
             try {

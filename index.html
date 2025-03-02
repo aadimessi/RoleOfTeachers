@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz App</title>
     <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.3.5/dist/confetti.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/xlsx.full.min.js"></script>
+
     <script>
     
 </script>
@@ -367,6 +368,48 @@ async function submitQuiz() {
                 <p>Your Score: ${score} / ${questions.length}</p>
             `;
         }
+
+        async function fetchQuizResults() {
+    const resultsCollection = collection(db, "quizResults");
+    const querySnapshot = await getDocs(resultsCollection);
+    
+    const results = [];
+    querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        results.push({
+            Name: data.name,
+            ID: data.id,
+            Score: data.score,
+            TotalQuestions: data.totalQuestions,
+            Timestamp: data.timestamp.toDate().toLocaleString()
+        });
+    });
+
+    return results;
+}
+
+        async function exportResultsToExcel() {
+    const results = await fetchQuizResults();
+
+    if (results.length === 0) {
+        alert("No quiz results to export!");
+        return;
+    }
+
+    // Create a new worksheet
+    const ws = XLSX.utils.json_to_sheet(results);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Quiz Results");
+
+    // Save the file
+    XLSX.writeFile(wb, "Quiz_Results.xlsx");
+}
+<div class="container">
+    <h2>Admin Panel</h2>
+    <button class="btn" onclick="exportResultsToExcel()">Export Results to Excel</button>
+</div>
+
+
     </script>
 
 </body>

@@ -314,49 +314,48 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
         }
 
 async function submitQuiz() {
-    clearInterval(timerInterval); // Stop the timer
+    const studentName = document.getElementById("studentName").value;
+    const studentID = document.getElementById("studentID").value;
+    const score = calculateQuizScore(); // Assume this function calculates the score
 
-    // Get the student's details
-    const studentName = document.getElementById("name").value.trim();
-    const studentID = document.getElementById("id").value.trim();
-
-    // Save the score in Firestore with studentID as the document ID
-    try {
-        await setDoc(doc(db, "quizResults", studentName), {
-            name: studentName,
-            score: score,
-            totalQuestions: questions.length,
-            timestamp: new Date()
-        });
-
-        showResult(); // Show the final score on the screen
-    } catch (error) {
-        console.error("❌ Error saving score:", error);
+    if (!studentName || !studentID) {
+        alert("Please enter your name and ID!");
+        return;
     }
-}
 
-
-    async function saveResult() {
-    const studentName = document.getElementById("name").value.trim();
-    const studentID = document.getElementById("id").value.trim();
-
-    if (!studentName || !studentID) return;
-
-    const resultRef = collection(db, "quizResults");
-    const resultData = {
-        name: studentName,
-        id: studentID,
-        score: score,
-        totalQuestions: questions.length,
-        timestamp: new Date()
+    // Prepare the result data
+    const result = {
+        Name: studentName,
+        ID: studentID,
+        Score: score,
+        Timestamp: new Date().toLocaleString()
     };
 
-    try {
-        await addDoc(resultRef, resultData);
-        console.log("Quiz result saved successfully!");
-    } catch (error) {
-        console.error("Error saving quiz result: ", error);
+    // Save the result to an Excel file
+    saveResultToExcel(result);
+}
+
+function saveResultToExcel(result) {
+    let existingResults = [];
+
+    // Check if there's already an existing results file
+    const savedData = localStorage.getItem("quizResults");
+
+    if (savedData) {
+        existingResults = JSON.parse(savedData);
     }
+
+    // Add the new result
+    existingResults.push(result);
+    localStorage.setItem("quizResults", JSON.stringify(existingResults));
+
+    // Create a new worksheet
+    const ws = XLSX.utils.json_to_sheet(existingResults);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Quiz Results");
+
+    // Automatically download the updated Excel file
+    XLSX.writeFile(wb, "Quiz_Results.xlsx");
 }
 
         

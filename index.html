@@ -366,50 +366,7 @@ function saveResultToExcel(result) {
             `;
         }
 
-        async function fetchQuizResults() {
-    const resultsCollection = collection(db, "quizResults");
-    const querySnapshot = await getDocs(resultsCollection);
-    
-    const results = [];
-    querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        results.push({
-            Name: data.name,
-            ID: data.id,
-            Score: data.score,
-            TotalQuestions: data.totalQuestions,
-            Timestamp: data.timestamp.toDate().toLocaleString()
-        });
-    });
-
-    return results;
-}
-
-        async function exportResultsToExcel() {
-    const results = await fetchQuizResults();
-
-    if (results.length === 0) {
-        alert("No quiz results to export!");
-        return;
-    }
-
-    // Create a new worksheet
-    const ws = XLSX.utils.json_to_sheet(results);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Quiz Results");
-
-    // Save the file
-    XLSX.writeFile(wb, "Quiz_Results.xlsx");
-}
-
     </script>
-        
-<div class="container">
-    <h2>Admin Panel</h2>
-    <button class="btn" onclick="exportResultsToExcel()">Export Results to Excel</button>
-</div>
-
-
     
 
 </body>

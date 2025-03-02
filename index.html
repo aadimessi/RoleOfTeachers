@@ -362,11 +362,6 @@ async function submitQuiz() {
 
         
         function showResult() {
-             window.confetti({
-        particleCount: 100,
-        spread: 70,
-        origin: { y: 0.6 }
-    });
             document.getElementById("quizSection").innerHTML = `
                 <h2>Quiz Completed!</h2>
                 <p>Your Score: ${score} / ${questions.length}</p>

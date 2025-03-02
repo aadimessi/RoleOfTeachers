@@ -105,11 +105,24 @@
             to { transform: scale(1.05); }
         }
 
-        
+        @keyframes slideIn {
+    0% {
+        transform: translateY(-100%);
+        opacity: 0;
+    }
+    100% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+#quizSection {
+    animation: slideIn 0.5s ease forwards;
+}
+
     </style>
 </head>
-<body>
-
+    
 <div class="container" id="loginSection">
     <h2>Student Login</h2>
     <input type="text" id="name" class="input-field" placeholder="Enter your name">

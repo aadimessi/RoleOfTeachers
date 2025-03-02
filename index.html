@@ -147,25 +147,27 @@
         let selectedAnswer = null;
         let timerInterval;
 
-        // Start the timer function
-        function startTimer(durationInMinutes) {
-            const timerDisplay = document.getElementById("timer");
-            let timeLeft = durationInMinutes * 60;
+function startTimer(durationInMinutes) {
+    const timerDisplay = document.getElementById("timer");
+    let timeLeft = durationInMinutes * 60;
 
-            timerInterval = setInterval(() => {
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = timeLeft % 60;
+    timerInterval = setInterval(() => {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
 
-                timerDisplay.innerText = `Time Left: ${minutes}m ${seconds}s`;
+        timerDisplay.innerText = `Time Left: ${minutes}m ${seconds}s`;
 
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    alert("Time's up! Submitting your answers automatically.");
-                    submitQuiz();
-                }
-                timeLeft--;
-            }, 1000);
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            alert("Time's up! Submitting your answers automatically.");
+            submitQuiz();
+        } else if (timeLeft <= 60) { // Last minute warning
+            timerDisplay.style.color = "#dc3545"; // Red color
         }
+        timeLeft--;
+    }, 1000);
+}
+
 
 document.getElementById("loginBtn").addEventListener("click", async () => {
     const studentName = document.getElementById("name").value.trim();

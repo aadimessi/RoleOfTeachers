@@ -314,8 +314,8 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
         }
 
 async function submitQuiz() {
-    const studentName = document.getElementById("studentName").value;
-    const studentID = document.getElementById("studentID").value;
+    const studentName = document.getElementById("name").value;
+    const studentID = document.getElementById("id").value;
     const score = calculateQuizScore(); // Assume this function calculates the score
 
     if (!studentName || !studentID) {

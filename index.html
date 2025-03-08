@@ -294,24 +294,20 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 async function submitQuiz() {
     clearInterval(timerInterval); // Stop the timer
 
-    // Get the student's details
-    const studentName = document.getElementById("name").value.trim();
-    const studentID = document.getElementById("id").value.trim();
-
-    // Save the score in Firestore with studentID as the document ID
-    try {
-        await setDoc(doc(db, "quizResults", studentName), {
-            name: studentName,
-            score: score,
-            totalQuestions: questions.length,
-            timestamp: new Date()
-        });
-
-        showResult(); // Show the final score on the screen
-    } catch (error) {
-        console.error("❌ Error saving score:", error);
+    if (!selectedAnswer) {
+        alert("Please select an option before submitting!");
+        return;
     }
+
+    const currentQuestion = questions[currentQuestionIndex];
+    if (selectedAnswer === currentQuestion.correctAnswer) {
+        score++;
+    }
+
+    await saveResult(); // Save to Firestore & Google Sheets
+    showResult();
 }
+
 
 
 async function saveResult() {

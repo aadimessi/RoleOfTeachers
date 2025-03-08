@@ -4,11 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz App</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/xlsx.full.min.js"></script>
-    
-</script>
-
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -107,25 +102,10 @@
             from { transform: scale(1); }
             to { transform: scale(1.05); }
         }
-
-        @keyframes slideIn {
-    0% {
-        transform: translateY(-100%);
-        opacity: 0;
-    }
-    100% {
-        transform: translateY(0);
-        opacity: 1;
-    }
-}
-
-#quizSection {
-    animation: slideIn 0.5s ease forwards;
-}
-
     </style>
 </head>
-    
+<body>
+
 <div class="container" id="loginSection">
     <h2>Student Login</h2>
     <input type="text" id="name" class="input-field" placeholder="Enter your name">
@@ -167,27 +147,25 @@
         let selectedAnswer = null;
         let timerInterval;
 
-function startTimer(durationInMinutes) {
-    const timerDisplay = document.getElementById("timer");
-    let timeLeft = durationInMinutes * 60;
+        // Start the timer function
+        function startTimer(durationInMinutes) {
+            const timerDisplay = document.getElementById("timer");
+            let timeLeft = durationInMinutes * 60;
 
-    timerInterval = setInterval(() => {
-        const minutes = Math.floor(timeLeft / 60);
-        const seconds = timeLeft % 60;
+            timerInterval = setInterval(() => {
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
 
-        timerDisplay.innerText = `Time Left: ${minutes}m ${seconds}s`;
+                timerDisplay.innerText = `Time Left: ${minutes}m ${seconds}s`;
 
-        if (timeLeft <= 0) {
-            clearInterval(timerInterval);
-            alert("Time's up! Submitting your answers automatically.");
-            submitQuiz();
-        } else if (timeLeft <= 60) { // Last minute warning
-            timerDisplay.style.color = "#dc3545"; // Red color
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert("Time's up! Submitting your answers automatically.");
+                    submitQuiz();
+                }
+                timeLeft--;
+            }, 1000);
         }
-        timeLeft--;
-    }, 1000);
-}
-
 
 document.getElementById("loginBtn").addEventListener("click", async () => {
     const studentName = document.getElementById("name").value.trim();
@@ -314,79 +292,59 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
         }
 
 async function submitQuiz() {
-    const studentName = document.getElementById("name").value;
-    const studentID = document.getElementById("id").value;
+    clearInterval(timerInterval); // Stop the timer
 
-    if (!studentName || !studentID) {
-        alert("Please enter your name and ID!");
-        return;
+    // Get the student's details
+    const studentName = document.getElementById("name").value.trim();
+    const studentID = document.getElementById("id").value.trim();
+
+    // Save the score in Firestore with studentID as the document ID
+    try {
+        await setDoc(doc(db, "quizResults", studentName), {
+            name: studentName,
+            score: score,
+            totalQuestions: questions.length,
+            timestamp: new Date()
+        });
+
+        showResult(); // Show the final score on the screen
+    } catch (error) {
+        console.error("❌ Error saving score:", error);
     }
+}
 
-    // Prepare the result data
-    const result = {
+
+    async function saveResult() {
+    const studentName = document.getElementById("name").value.trim();
+    const studentID = document.getElementById("id").value.trim();
+
+    if (!studentName || !studentID) return;
+
+    const resultRef = collection(db, "quizResults");
+    const resultData = {
         name: studentName,
         id: studentID,
         score: score,
         totalQuestions: questions.length,
-        timestamp: new Date().toLocaleString()
+        timestamp: new Date()
     };
 
     try {
-        // Save the result to Firestore
-        const resultDocRef = doc(db, "quizResults", studentID); 
-        await setDoc(resultDocRef, result);
-
-        // Save the result to an Excel file
-        saveResultToExcel(result);
-
-        // Show the final score to the student
-        showResult();
+        await addDoc(resultRef, resultData);
+        console.log("Quiz result saved successfully!");
     } catch (error) {
-        console.error("Error saving result to Firestore: ", error);
-        alert("Failed to save your result. Please try again.");
+        console.error("Error saving quiz result: ", error);
     }
-}
-
-
-function saveResultToExcel(result) {
-    let existingResults = [];
-
-    // Check if there's already an existing results file
-    const savedData = localStorage.getItem("quizResults");
-
-    if (savedData) {
-        existingResults = JSON.parse(savedData);
-    }
-
-    // Add the new result
-    existingResults.push(result);
-    localStorage.setItem("quizResults", JSON.stringify(existingResults));
-
-    // Create a new worksheet
-    const ws = XLSX.utils.json_to_sheet(existingResults);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Quiz Results");
-
-    // Automatically download the updated Excel file
-    XLSX.writeFile(wb, "Quiz_Results.xlsx");
 }
 
         
-function showResult() {
-    clearInterval(timerInterval); // Stop the timer
-
-    const quizSection = document.getElementById("quizSection");
-    quizSection.innerHTML = `
-        <h2>Quiz Completed!</h2>
-        <p>Your Score: ${score} / ${questions.length}</p>
-        <p>Result saved successfully to the database! ✅</p>
-    `;
-}
-
-
-
+        function showResult() {
+            document.getElementById("quizSection").innerHTML = `
+                <h2>Quiz Completed!</h2>
+                <p>Your Score: ${score} / ${questions.length}</p>
+            `;
+        }
     </script>
-    
 
 </body>
 </html>

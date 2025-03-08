@@ -314,7 +314,7 @@ async function submitQuiz() {
 }
 
 
-    async function saveResult() {
+async function saveResult() {
     const studentName = document.getElementById("name").value.trim();
     const studentID = document.getElementById("id").value.trim();
 
@@ -330,10 +330,26 @@ async function submitQuiz() {
     };
 
     try {
+        // Save result to Firestore
         await addDoc(resultRef, resultData);
-        console.log("Quiz result saved successfully!");
+        console.log("✅ Quiz result saved to Firestore!");
+
+        // Send result to Google Sheets
+        const sheetUrl = "https://script.google.com/macros/s/YOUR-DEPLOYMENT-ID/exec";
+        await fetch(sheetUrl, {
+            method: "POST",
+            body: JSON.stringify({
+                name: studentName,
+                score: score,
+            }),
+            headers: { "Content-Type": "application/json" }
+        });
+
+        console.log("✅ Quiz result sent to Google Sheets!");
+        alert("Quiz results saved successfully to Firestore and Google Sheets!");
     } catch (error) {
-        console.error("Error saving quiz result: ", error);
+        console.error("❌ Error saving quiz result: ", error);
+        alert("Error saving result. Please try again.");
     }
 }
 

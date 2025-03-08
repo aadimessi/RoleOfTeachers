@@ -316,7 +316,6 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 async function submitQuiz() {
     const studentName = document.getElementById("name").value;
     const studentID = document.getElementById("id").value;
-    const score = calculateQuizScore(); // Assume this function calculates the score
 
     if (!studentName || !studentID) {
         alert("Please enter your name and ID!");
@@ -325,15 +324,29 @@ async function submitQuiz() {
 
     // Prepare the result data
     const result = {
-        Name: studentName,
-        ID: studentID,
-        Score: score,
-        Timestamp: new Date().toLocaleString()
+        name: studentName,
+        id: studentID,
+        score: score,
+        totalQuestions: questions.length,
+        timestamp: new Date().toLocaleString()
     };
 
-    // Save the result to an Excel file
-    saveResultToExcel(result);
+    try {
+        // Save the result to Firestore
+        const resultDocRef = doc(db, "quizResults", studentID); 
+        await setDoc(resultDocRef, result);
+
+        // Save the result to an Excel file
+        saveResultToExcel(result);
+
+        // Show the final score to the student
+        showResult();
+    } catch (error) {
+        console.error("Error saving result to Firestore: ", error);
+        alert("Failed to save your result. Please try again.");
+    }
 }
+
 
 function saveResultToExcel(result) {
     let existingResults = [];
@@ -359,12 +372,16 @@ function saveResultToExcel(result) {
 }
 
         
-        function showResult() {
-            document.getElementById("quizSection").innerHTML = `
-                <h2>Quiz Completed!</h2>
-                <p>Your Score: ${score} / ${questions.length}</p>
-            `;
-        }
+function showResult() {
+    clearInterval(timerInterval); // Stop the timer
+
+    document.getElementById("quizSection").innerHTML = `
+        <h2>Quiz Completed!</h2>
+        <p>Your Score: ${score} / ${questions.length}</p>
+        <p>Result saved successfully! ✅</p>
+    `;
+}
+
 
     </script>
     

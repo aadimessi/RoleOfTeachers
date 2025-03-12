@@ -128,6 +128,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, getDoc, doc , setDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { addDoc, setDoc, collection, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
@@ -312,8 +313,6 @@ async function submitQuiz() {
 
 // Save the quiz result to Firestore and Google Sheets
 async function saveResult() {
-    // Import Firestore functions
-    import { addDoc, setDoc, collection, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
     const studentName = document.getElementById("name").value.trim();
     const studentID = document.getElementById("id").value.trim();

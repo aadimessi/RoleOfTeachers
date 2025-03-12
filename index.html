@@ -123,9 +123,11 @@
     <div id="result"></div>
 </div>
 
+</body>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, getDoc, doc , setDoc, query, where, addDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, getDoc, doc , setDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
@@ -292,34 +294,33 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 async function submitQuiz() {
     clearInterval(timerInterval); // Stop the timer
 
-    if (!selectedAnswer) {
-        alert("Please select an option before submitting!");
-        return;
-    }
-
-    const currentQuestion = questions[currentQuestionIndex];
-    if (selectedAnswer === currentQuestion.correctAnswer) {
-        score++;
-    }
-
-    await saveResult(); // Save to Firestore & Google Sheets
-    showResult();
-}
-
-
-
-// Save the quiz result to Firestore and Google Sheets
-async function saveResult() {
-
+    // Get the student's details
     const studentName = document.getElementById("name").value.trim();
     const studentID = document.getElementById("id").value.trim();
 
-    if (!studentName || !studentID) {
-        alert("Please enter both name and ID.");
-        return;
-    }
+    // Save the score in Firestore with studentID as the document ID
+    try {
+        await setDoc(doc(db, "quizResults", studentName), {
+            name: studentName,
+            score: score,
+            totalQuestions: questions.length,
+            timestamp: new Date()
+        });
 
-    // Prepare result data
+        showResult(); // Show the final score on the screen
+    } catch (error) {
+        console.error("❌ Error saving score:", error);
+    }
+}
+
+
+    async function saveResult() {
+    const studentName = document.getElementById("name").value.trim();
+    const studentID = document.getElementById("id").value.trim();
+
+    if (!studentName || !studentID) return;
+
+    const resultRef = collection(db, "quizResults");
     const resultData = {
         name: studentName,
         id: studentID,
@@ -329,36 +330,10 @@ async function saveResult() {
     };
 
     try {
-        // Save result to Firestore
-        const resultRef = doc(db, "quizResults", studentID); // Use student ID as the document ID
-        await setDoc(resultRef, resultData);
-        console.log("✅ Quiz result saved to Firestore!");
-
-        // Send result to Google Sheets
-        const sheetUrl = "https://script.google.com/macros/s/AKfycbxLkgLBkhncYyGQgn0Ll1J7A0PJotiJF88BiCKIUJonlD_p1S7uUeHbbaUww5YBeir5WA/exec";
-        
-        try {
-            const response = await fetch(sheetUrl, {
-                method: "POST",
-                body: JSON.stringify({ name: studentName, score: score }),
-                headers: { "Content-Type": "application/json" }
-            });
-
-            if (!response.ok) {
-                throw new Error(`Failed to send result to Google Sheets: ${response.status}`);
-            }
-
-            console.log("✅ Quiz result sent to Google Sheets!");
-            alert("Quiz results saved successfully to Firestore and Google Sheets!");
-
-        } catch (error) {
-            console.error("❌ Error sending result to Google Sheets: ", error);
-            alert("Result saved to Firestore, but failed to send to Google Sheets.");
-        }
-
+        await addDoc(resultRef, resultData);
+        console.log("Quiz result saved successfully!");
     } catch (error) {
-        console.error("❌ Error saving quiz result to Firestore: ", error);
-        alert("Error saving result to Firestore. Please try again.");
+        console.error("Error saving quiz result: ", error);
     }
 }
 

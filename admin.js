@@ -5,7 +5,65 @@ function addQuestion() {
     const option1 = document.getElementById('option1').value;
     const option2 = document.getElementById('option2').value;
     const option3 = document.getElementById('option3').value;
+    const option4 = document// Firebase Setup
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "YOUR_API_KEY",
+    authDomain: "YOUR_AUTH_DOMAIN",
+    projectId: "YOUR_PROJECT_ID",
+    storageBucket: "YOUR_STORAGE_BUCKET",
+    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+    appId: "YOUR_APP_ID"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+async function addQuestion() {
+    const questionText = document.getElementById('question-input').value;
+    const option1 = document.getElementById('option1').value;
+    const option2 = document.getElementById('option2').value;
+    const option3 = document.getElementById('option3').value;
     const option4 = document.getElementById('option4').value;
+    const correctAnswer = document.getElementById('correct-answer').value;
+
+    if (questionText && option1 && option2 && option3 && option4 && correctAnswer) {
+        try {
+            await addDoc(collection(db, "quizQuestions"), {
+                question: questionText,
+                options: [option1, option2, option3, option4],
+                correct: correctAnswer
+            });
+
+            alert("✅ Question added to Firebase!");
+        } catch (error) {
+            console.error("❌ Error adding question:", error);
+            alert("Failed to save question.");
+        }
+    } else {
+        alert("⚠️ Please fill in all fields!");
+    }
+}
+
+// Display Questions from Firebase
+async function displayQuestions() {
+    const questionList = document.getElementById("question-list");
+    questionList.innerHTML = "";
+
+    const querySnapshot = await getDocs(collection(db, "quizQuestions"));
+    querySnapshot.forEach((doc) => {
+        let li = document.createElement("li");
+        li.innerText = `${doc.data().question}`;
+        questionList.appendChild(li);
+    });
+}
+
+// Call displayQuestions when the page loads
+window.onload = displayQuestions;
+.getElementById('option4').value;
     const correctAnswer = document.getElementById('correct-answer').value;
 
     if (questionText && option1 && option2 && option3 && option4 && correctAnswer) {

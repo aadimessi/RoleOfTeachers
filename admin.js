@@ -1,6 +1,6 @@
 // 🔹 Import Firebase Modules
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-import { getFirestore, collection, addDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
 // 🔹 Firebase Configuration
 const firebaseConfig = {
@@ -19,44 +19,75 @@ const db = getFirestore(app);
 // 🔹 Function to Add Question to Firestore
 async function addQuestion() {
     const questionText = document.getElementById('question-input').value.trim();
-    const option1 = document.getElementById('option1').value.trim();
-    const option2 = document.getElementById('option2').value.trim();
-    const option3 = document.getElementById('option3').value.trim();
-    const option4 = document.getElementById('option4').value.trim();
-    const correctAnswer = document.getElementById('correct-answer').value;
+    const options = [
+        document.getElementById('option1').value.trim(),
+        document.getElementById('option2').value.trim(),
+        document.getElementById('option3').value.trim(),
+        document.getElementById('option4').value.trim()
+    ];
+    const correctAnswerIndex = document.getElementById('correct-answer').value;
+    const correctAnswer = options[correctAnswerIndex]; // Store correct answer as text
+    const saveButton = document.getElementById("saveQuestionBtn");
 
-    if (!questionText || !option1 || !option2 || !option3 || !option4) {
+    if (!questionText || options.includes("")) {
         alert("⚠️ Please fill in all fields!");
         return;
     }
 
+    saveButton.disabled = true; // Disable button to prevent multiple submissions
+
     try {
         await addDoc(collection(db, "quizQuestions"), {
             question: questionText,
-            options: [option1, option2, option3, option4],
-            correct: correctAnswer
+            options: options,
+            correctAnswer: correctAnswer
         });
 
-        alert("✅ Question added to Firebase!");
+        alert("✅ Question added successfully!");
         clearInputFields();
         displayQuestions(); // Refresh displayed questions
     } catch (error) {
         console.error("❌ Error adding question:", error);
         alert("Failed to save question.");
+    } finally {
+        saveButton.disabled = false; // Re-enable button
     }
 }
 
 // 🔹 Function to Display Questions from Firebase
 async function displayQuestions() {
     const questionList = document.getElementById("question-list");
-    questionList.innerHTML = "";
+    questionList.innerHTML = "Loading...";
 
-    const querySnapshot = await getDocs(collection(db, "quizQuestions"));
-    querySnapshot.forEach((doc) => {
-        let li = document.createElement("li");
-        li.innerText = doc.data().question;
-        questionList.appendChild(li);
-    });
+    try {
+        const querySnapshot = await getDocs(collection(db, "quizQuestions"));
+        questionList.innerHTML = "";
+
+        querySnapshot.forEach((docSnap) => {
+            const questionData = docSnap.data();
+            const questionId = docSnap.id;
+            let li = document.createElement("li");
+            li.innerHTML = `${questionData.question} <button onclick="deleteQuestion('${questionId}')">❌ Delete</button>`;
+            questionList.appendChild(li);
+        });
+    } catch (error) {
+        console.error("❌ Error loading questions:", error);
+        questionList.innerHTML = "Failed to load questions.";
+    }
+}
+
+// 🔹 Function to Delete a Question from Firestore
+async function deleteQuestion(id) {
+    if (!confirm("Are you sure you want to delete this question?")) return;
+
+    try {
+        await deleteDoc(doc(db, "quizQuestions", id));
+        alert("🗑️ Question deleted successfully!");
+        displayQuestions(); // Refresh the list
+    } catch (error) {
+        console.error("❌ Error deleting question:", error);
+        alert("Failed to delete question.");
+    }
 }
 
 // 🔹 Function to Clear Input Fields

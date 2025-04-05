@@ -339,11 +339,6 @@
             return;
         }
 
-        const currentQuestion = questions[currentQuestionIndex];
-        if (selectedAnswer === currentQuestion.correctAnswer) {
-            score++;
-        }
-
         currentQuestionIndex++;
         if (currentQuestionIndex < questions.length) {
             displayQuestion();
@@ -358,33 +353,37 @@
             return;
         }
 
-        const currentQuestion = questions[currentQuestionIndex];
-        if (selectedAnswer === currentQuestion.correctAnswer) {
-            score++;
-        }
-
         submitQuiz();
     });
 
-    async function submitQuiz() {
-        clearInterval(timerInterval);
+async function submitQuiz() {
+    clearInterval(timerInterval);
 
-        const studentName = document.getElementById("name").value.trim();
-        const studentID = document.getElementById("id").value.trim();
+    const studentName = document.getElementById("name").value.trim();
+    const studentID = document.getElementById("id").value.trim();
 
-        try {
-            await setDoc(doc(db, "quizResults", studentName), {
-                name: studentName,
-                score: score,
-                totalQuestions: questions.length,
-                timestamp: new Date()
-            });
-
-            showResult();
-        } catch (error) {
-            console.error("❌ Error saving score:", error);
+    // Recalculate score properly
+    score = 0;
+    for (let i = 0; i < questions.length; i++) {
+        if (answers[i] === questions[i].correctAnswer) {
+            score++;
         }
     }
+
+    try {
+        await setDoc(doc(db, "quizResults", studentName), {
+            name: studentName,
+            score: score,
+            totalQuestions: questions.length,
+            timestamp: new Date()
+        });
+
+        showResult();
+    } catch (error) {
+        console.error("❌ Error saving score:", error);
+    }
+}
+
 
     function showResult() {
         document.getElementById("quizSection").innerHTML = `

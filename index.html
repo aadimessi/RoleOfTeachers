@@ -147,6 +147,7 @@
     <div id="timer">Time Left: 60m 0s</div>
     <div id="question-container"></div>
     <div id="options-container"></div>
+    <div id="nav-bar" class="nav-bar"></div>
     <button id="nextBtn" class="btn" style="display: none;">Next</button>
     <button id="submitBtn" class="btn" style="display: none;">Submit</button>
     <div id="result"></div>
@@ -248,72 +249,44 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
                 console.error("Error loading questions: ", error);
             }
         }
+function displayQuestion() {
+    const questionContainer = document.getElementById("question-container");
+    const optionsContainer = document.getElementById("options-container");
+    const nextBtn = document.getElementById("nextBtn");
+    const submitBtn = document.getElementById("submitBtn");
+    const resultContainer = document.getElementById("result");
 
-        function displayQuestion() {
-            const questionContainer = document.getElementById("question-container");
-            const optionsContainer = document.getElementById("options-container");
-            const nextBtn = document.getElementById("nextBtn");
-            const submitBtn = document.getElementById("submitBtn");
-            const resultContainer = document.getElementById("result");
+    resultContainer.innerHTML = "";
+    optionsContainer.innerHTML = "";
 
-            resultContainer.innerHTML = "";
-            optionsContainer.innerHTML = "";
-            selectedAnswer = null;
+    if (currentQuestionIndex >= questions.length) {
+        return;
+    }
 
-            if (currentQuestionIndex >= questions.length) {
-                return;
-            }
+    const currentQuestion = questions[currentQuestionIndex];
+    questionContainer.innerHTML = `<h2>Q${currentQuestionIndex + 1}. ${currentQuestion.question}</h2>`;
 
-            const currentQuestion = questions[currentQuestionIndex];
-            questionContainer.innerHTML = `<h2>Q${currentQuestionIndex + 1}. ${currentQuestion.question}</h2>`;
+    selectedAnswer = answers[currentQuestionIndex] || null; // Load stored answer if exists
 
-            currentQuestion.options.forEach(option => {
-                const button = document.createElement("button");
-                button.innerText = option;
-                button.classList.add("option-btn");
+    currentQuestion.options.forEach(option => {
+        const button = document.createElement("button");
+        button.innerText = option;
+        button.classList.add("option-btn");
 
-                button.onclick = () => selectAnswer(button, option);
-                optionsContainer.appendChild(button);
-            });
-
-            nextBtn.style.display = currentQuestionIndex < questions.length - 1 ? "block" : "none";
-            submitBtn.style.display = currentQuestionIndex === questions.length - 1 ? "block" : "none";
+        if (selectedAnswer === option) {
+            button.style.backgroundColor = "#28a745"; // Highlight previously selected
         }
 
-    document.getElementById("nextBtn").addEventListener("click", () => {
-    if (selectedAnswer === null) {
-        alert("Please select an option before moving to the next question!");
-        return;
-    }
+        button.onclick = () => selectAnswer(button, option);
+        optionsContainer.appendChild(button);
+    });
 
-    const currentQuestion = questions[currentQuestionIndex];
-    if (selectedAnswer === currentQuestion.correctAnswer) {
-        score++;
-    }
+    nextBtn.style.display = currentQuestionIndex < questions.length - 1 ? "block" : "none";
+    submitBtn.style.display = currentQuestionIndex === questions.length - 1 ? "block" : "none";
 
-    currentQuestionIndex++;
-    if (currentQuestionIndex < questions.length) {
-        displayQuestion();
-    } else {
-        submitQuiz();
-    }
-});
+    updateNavBar(); // Optional: if you are using navigation bar
+}
 
-        document.getElementById("submitBtn").addEventListener("click", () => {
-    if (selectedAnswer === null) {
-        alert("Please select an option before submitting!");
-        return;
-    }
-
-    const currentQuestion = questions[currentQuestionIndex];
-    if (selectedAnswer === currentQuestion.correctAnswer) {
-        score++;
-    }
-
-    submitQuiz();
-});
-
-        
         function selectAnswer(button, option) {
             selectedAnswer = option;
             document.querySelectorAll(".option-btn").forEach(btn => btn.style.backgroundColor = "#007bff");

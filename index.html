@@ -102,6 +102,39 @@
             from { transform: scale(1); }
             to { transform: scale(1.05); }
         }
+
+        <!-- SAME HEAD & STYLES AS YOUR CODE, ADD BELOW INSIDE STYLE TAG -->
+<style>
+    /* ... your existing styles ... */
+
+    .nav-bar {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 20px;
+        gap: 10px;
+    }
+
+    .nav-button {
+        padding: 10px 15px;
+        font-size: 1rem;
+        border: 2px solid #007bff;
+        background-color: white;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.3s;
+    }
+
+    .nav-button.active {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .nav-button.visited {
+        background-color: #cce5ff;
+        color: black;
+    }
+
     </style>
 </head>
 <body>

@@ -236,7 +236,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
             }
 
             const currentQuestion = questions[currentQuestionIndex];
-            questionContainer.innerHTML = `<h2>${currentQuestion.question}</h2>`;
+            questionContainer.innerHTML = `<h2>Q${currentQuestionIndex + 1}. ${currentQuestion.question}</h2>`;
 
             currentQuestion.options.forEach(option => {
                 const button = document.createElement("button");

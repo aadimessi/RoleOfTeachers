@@ -156,197 +156,240 @@
 </body>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, getDoc, doc , setDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+    import { getFirestore, collection, getDocs, getDoc, doc, setDoc, query, where } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
-            authDomain: "quiz-app-e8d1d.firebaseapp.com",
-            projectId: "quiz-app-e8d1d",
-            storageBucket: "quiz-app-e8d1d.appspot.com",
-            messagingSenderId: "421848385039",
-            appId: "1:421848385039:web:cbb560cf9d839752ce457a"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        let questions = [];
-        let currentQuestionIndex = 0;
-        let score = 0;
-        let selectedAnswer = null;
-        let timerInterval;
-
-        // Start the timer function
-        function startTimer(durationInMinutes) {
-            const timerDisplay = document.getElementById("timer");
-            let timeLeft = durationInMinutes * 60;
-
-            timerInterval = setInterval(() => {
-                const minutes = Math.floor(timeLeft / 60);
-                const seconds = timeLeft % 60;
-
-                timerDisplay.innerText = `Time Left: ${minutes}m ${seconds}s`;
-
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    alert("Time's up! Submitting your answers automatically.");
-                    submitQuiz();
-                }
-                timeLeft--;
-            }, 1000);
-        }
-
-document.getElementById("loginBtn").addEventListener("click", async () => {
-    const studentName = document.getElementById("name").value.trim();
-    const studentID = document.getElementById("id").value.trim();
-
-    if (!studentName || !studentID) {
-        alert("⚠️ Please enter both Name and ID.");
-        return;
-    }
-
-    // Check if student exists in Firestore
-    const studentCollection = collection(db, "students");
-    const q = query(studentCollection, where("id", "==", studentID), where("name", "==", studentName));
-    const querySnapshot = await getDocs(q);
-
-    if (querySnapshot.empty) {
-        alert("❌ Student not found! You are not authorized to take the quiz.");
-        return;
-    }
-
-    // ✅ Check if student already submitted the quiz
-    const resultDocRef = doc(db, "quizResults", studentName); 
-    const resultDoc = await getDoc(resultDocRef);
-
-    if (resultDoc.exists()) {
-        alert("✅ You have already completed the quiz! Your score is saved.");
-        return;
-    }
-
-    // 🟢 If student hasn't taken the quiz, allow them to start
-    document.getElementById("loginSection").style.display = "none";
-    document.getElementById("quizSection").style.display = "block";
-
-    loadQuestions();
-    startTimer(60); // Start the 1-hour timer
-});
-
-
-        async function loadQuestions() {
-            try {
-                const querySnapshot = await getDocs(collection(db, "quizQuestions"));
-                questions = querySnapshot.docs.map(doc => doc.data());
-
-                if (questions.length === 0) {
-                    alert("No questions found in the database.");
-                    return;
-                }
-
-                displayQuestion();
-            } catch (error) {
-                console.error("Error loading questions: ", error);
-            }
-        }
-function displayQuestion() {
-    const questionContainer = document.getElementById("question-container");
-    const optionsContainer = document.getElementById("options-container");
-    const nextBtn = document.getElementById("nextBtn");
-    const submitBtn = document.getElementById("submitBtn");
-    const resultContainer = document.getElementById("result");
-
-    resultContainer.innerHTML = "";
-    optionsContainer.innerHTML = "";
-
-    if (currentQuestionIndex >= questions.length) {
-        return;
-    }
-
-    const currentQuestion = questions[currentQuestionIndex];
-    questionContainer.innerHTML = `<h2>Q${currentQuestionIndex + 1}. ${currentQuestion.question}</h2>`;
-
-    selectedAnswer = answers[currentQuestionIndex] || null; // Load stored answer if exists
-
-    currentQuestion.options.forEach(option => {
-        const button = document.createElement("button");
-        button.innerText = option;
-        button.classList.add("option-btn");
-
-        if (selectedAnswer === option) {
-            button.style.backgroundColor = "#28a745"; // Highlight previously selected
-        }
-
-        button.onclick = () => selectAnswer(button, option);
-        optionsContainer.appendChild(button);
-    });
-
-    nextBtn.style.display = currentQuestionIndex < questions.length - 1 ? "block" : "none";
-    submitBtn.style.display = currentQuestionIndex === questions.length - 1 ? "block" : "none";
-
-    updateNavBar(); // Optional: if you are using navigation bar
-}
-
-        function selectAnswer(button, option) {
-            selectedAnswer = option;
-            document.querySelectorAll(".option-btn").forEach(btn => btn.style.backgroundColor = "#007bff");
-            button.style.backgroundColor = "#28a745";
-        }
-
-async function submitQuiz() {
-    clearInterval(timerInterval); // Stop the timer
-
-    // Get the student's details
-    const studentName = document.getElementById("name").value.trim();
-    const studentID = document.getElementById("id").value.trim();
-
-    // Save the score in Firestore with studentID as the document ID
-    try {
-        await setDoc(doc(db, "quizResults", studentName), {
-            name: studentName,
-            score: score,
-            totalQuestions: questions.length,
-            timestamp: new Date()
-        });
-
-        showResult(); // Show the final score on the screen
-    } catch (error) {
-        console.error("❌ Error saving score:", error);
-    }
-}
-
-
-    async function saveResult() {
-    const studentName = document.getElementById("name").value.trim();
-    const studentID = document.getElementById("id").value.trim();
-
-    if (!studentName || !studentID) return;
-
-    const resultRef = collection(db, "quizResults");
-    const resultData = {
-        name: studentName,
-        id: studentID,
-        score: score,
-        totalQuestions: questions.length,
-        timestamp: new Date()
+    const firebaseConfig = {
+        apiKey: "AIzaSyAdvbkZaLSJsJlaAkURHACbt2cJtemBa5U",
+        authDomain: "quiz-app-e8d1d.firebaseapp.com",
+        projectId: "quiz-app-e8d1d",
+        storageBucket: "quiz-app-e8d1d.appspot.com",
+        messagingSenderId: "421848385039",
+        appId: "1:421848385039:web:cbb560cf9d839752ce457a"
     };
 
-    try {
-        await addDoc(resultRef, resultData);
-        console.log("Quiz result saved successfully!");
-    } catch (error) {
-        console.error("Error saving quiz result: ", error);
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    let questions = [];
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let selectedAnswer = null;
+    let answers = [];
+    let timerInterval;
+
+    function startTimer(durationInMinutes) {
+        const timerDisplay = document.getElementById("timer");
+        let timeLeft = durationInMinutes * 60;
+
+        timerInterval = setInterval(() => {
+            const minutes = Math.floor(timeLeft / 60);
+            const seconds = timeLeft % 60;
+
+            timerDisplay.innerText = `Time Left: ${minutes}m ${seconds}s`;
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                alert("Time's up! Submitting your answers automatically.");
+                submitQuiz();
+            }
+            timeLeft--;
+        }, 1000);
     }
-}
 
-        
-        function showResult() {
-            document.getElementById("quizSection").innerHTML = `
-                <h2>Quiz Completed!</h2>
-                <p>Your Score: ${score} / ${questions.length}</p>
-            `;
+    document.getElementById("loginBtn").addEventListener("click", async () => {
+        const studentName = document.getElementById("name").value.trim();
+        const studentID = document.getElementById("id").value.trim();
+
+        if (!studentName || !studentID) {
+            alert("⚠️ Please enter both Name and ID.");
+            return;
         }
-    </script>
 
-</body>
-</html>
+        const studentCollection = collection(db, "students");
+        const q = query(studentCollection, where("id", "==", studentID), where("name", "==", studentName));
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+            alert("❌ Student not found! You are not authorized to take the quiz.");
+            return;
+        }
+
+        const resultDocRef = doc(db, "quizResults", studentName);
+        const resultDoc = await getDoc(resultDocRef);
+
+        if (resultDoc.exists()) {
+            alert("✅ You have already completed the quiz! Your score is saved.");
+            return;
+        }
+
+        document.getElementById("loginSection").style.display = "none";
+        document.getElementById("quizSection").style.display = "block";
+
+        loadQuestions();
+        startTimer(60);
+    });
+
+    async function loadQuestions() {
+        try {
+            const querySnapshot = await getDocs(collection(db, "quizQuestions"));
+            questions = querySnapshot.docs.map(doc => doc.data());
+
+            if (questions.length === 0) {
+                alert("No questions found in the database.");
+                return;
+            }
+
+            createNavBar();
+            displayQuestion();
+        } catch (error) {
+            console.error("Error loading questions: ", error);
+        }
+    }
+
+    function createNavBar() {
+        const navBar = document.createElement("div");
+        navBar.id = "nav-bar";
+        navBar.style.marginTop = "20px";
+        navBar.style.display = "flex";
+        navBar.style.flexWrap = "wrap";
+        navBar.style.justifyContent = "center";
+        navBar.style.gap = "10px";
+
+        for (let i = 0; i < questions.length; i++) {
+            const navBtn = document.createElement("button");
+            navBtn.textContent = i + 1;
+            navBtn.classList.add("btn");
+            navBtn.style.width = "40px";
+            navBtn.style.padding = "10px";
+            navBtn.onclick = () => {
+                currentQuestionIndex = i;
+                displayQuestion();
+            };
+            navBar.appendChild(navBtn);
+        }
+
+        document.getElementById("quizSection").appendChild(navBar);
+    }
+
+    function updateNavBar() {
+        const navButtons = document.querySelectorAll("#nav-bar button");
+        navButtons.forEach((btn, index) => {
+            if (index === currentQuestionIndex) {
+                btn.style.backgroundColor = "#ffc107";
+            } else if (answers[index]) {
+                btn.style.backgroundColor = "#28a745";
+            } else {
+                btn.style.backgroundColor = "#007bff";
+            }
+        });
+    }
+
+    function displayQuestion() {
+        const questionContainer = document.getElementById("question-container");
+        const optionsContainer = document.getElementById("options-container");
+        const nextBtn = document.getElementById("nextBtn");
+        const submitBtn = document.getElementById("submitBtn");
+        const resultContainer = document.getElementById("result");
+
+        resultContainer.innerHTML = "";
+        optionsContainer.innerHTML = "";
+
+        if (currentQuestionIndex >= questions.length) return;
+
+        const currentQuestion = questions[currentQuestionIndex];
+        questionContainer.innerHTML = `<h2>Q${currentQuestionIndex + 1}. ${currentQuestion.question}</h2>`;
+
+        selectedAnswer = answers[currentQuestionIndex] || null;
+
+        currentQuestion.options.forEach(option => {
+            const button = document.createElement("button");
+            button.innerText = option;
+            button.classList.add("option-btn");
+
+            if (selectedAnswer === option) {
+                button.style.backgroundColor = "#28a745";
+            }
+
+            button.onclick = () => selectAnswer(button, option);
+            optionsContainer.appendChild(button);
+        });
+
+        nextBtn.style.display = currentQuestionIndex < questions.length - 1 ? "block" : "none";
+        submitBtn.style.display = currentQuestionIndex === questions.length - 1 ? "block" : "none";
+
+        updateNavBar();
+    }
+
+    function selectAnswer(button, option) {
+        selectedAnswer = option;
+        answers[currentQuestionIndex] = option;
+
+        document.querySelectorAll(".option-btn").forEach(btn => {
+            btn.style.backgroundColor = "#007bff";
+        });
+        button.style.backgroundColor = "#28a745";
+
+        updateNavBar();
+    }
+
+    document.getElementById("nextBtn").addEventListener("click", () => {
+        if (selectedAnswer === null) {
+            alert("Please select an option before moving to the next question!");
+            return;
+        }
+
+        const currentQuestion = questions[currentQuestionIndex];
+        if (selectedAnswer === currentQuestion.correctAnswer) {
+            score++;
+        }
+
+        currentQuestionIndex++;
+        if (currentQuestionIndex < questions.length) {
+            displayQuestion();
+        } else {
+            submitQuiz();
+        }
+    });
+
+    document.getElementById("submitBtn").addEventListener("click", () => {
+        if (selectedAnswer === null) {
+            alert("Please select an option before submitting!");
+            return;
+        }
+
+        const currentQuestion = questions[currentQuestionIndex];
+        if (selectedAnswer === currentQuestion.correctAnswer) {
+            score++;
+        }
+
+        submitQuiz();
+    });
+
+    async function submitQuiz() {
+        clearInterval(timerInterval);
+
+        const studentName = document.getElementById("name").value.trim();
+        const studentID = document.getElementById("id").value.trim();
+
+        try {
+            await setDoc(doc(db, "quizResults", studentName), {
+                name: studentName,
+                score: score,
+                totalQuestions: questions.length,
+                timestamp: new Date()
+            });
+
+            showResult();
+        } catch (error) {
+            console.error("❌ Error saving score:", error);
+        }
+    }
+
+    function showResult() {
+        document.getElementById("quizSection").innerHTML = `
+            <h2>Quiz Completed!</h2>
+            <p>Your Score: ${score} / ${questions.length}</p>
+        `;
+    }
+</script>

@@ -131,6 +131,63 @@
         color: black;
     }
 
+    <style>
+    /* ... your existing styles ... (keep all of them) ... */
+
+    @media (max-width: 768px) {
+        .container {
+            width: 80%;
+            padding: 20px;
+        }
+
+        h1, h2 {
+            font-size: 2rem;
+        }
+
+        .input-field, .btn, .option-btn {
+            font-size: 1rem;
+            padding: 10px;
+        }
+
+        .nav-button {
+            font-size: 0.9rem;
+            padding: 8px 12px;
+        }
+
+        #timer {
+            font-size: 1.2rem;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .container {
+            width: 95%;
+            padding: 15px;
+        }
+
+        h1, h2 {
+            font-size: 1.5rem;
+        }
+
+        .input-field, .btn, .option-btn {
+            font-size: 0.95rem;
+            padding: 8px;
+        }
+
+        .nav-bar {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .nav-button {
+            width: 100%;
+            font-size: 0.9rem;
+        }
+
+        #timer {
+            font-size: 1rem;
+        }
+    }
     </style>
 </head>
 <body>

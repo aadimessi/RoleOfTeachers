@@ -423,12 +423,13 @@ async function submitQuiz() {
             score++;
         }
     }
-
+    score=score*2;
+    length = questions.length*2;
     try {
         await setDoc(doc(db, "quizResults", studentName), {
             name: studentName,
             score: score,
-            totalQuestions: questions.length,
+            totalMarks: length,
             timestamp: new Date()
         });
 
@@ -442,7 +443,7 @@ async function submitQuiz() {
     function showResult() {
         document.getElementById("quizSection").innerHTML = `
             <h2>Quiz Completed!</h2>
-            <p>Your Score: ${score*2} / ${(questions.length)*2}</p>
+            <p>Your Score: ${score} / ${length}</p>
         `;
     }
 </script>

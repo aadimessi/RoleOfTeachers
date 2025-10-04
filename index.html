@@ -433,7 +433,7 @@ async function submitQuiz() {
             timestamp: new Date()
         });
 
-        //showResult();
+        showResult();
     } catch (error) {
         console.error("❌ Error saving score:", error);
     }
@@ -443,7 +443,8 @@ async function submitQuiz() {
     function showResult() {
         document.getElementById("quizSection").innerHTML = `
             <h2>Quiz Completed!</h2>
-            <p>Your Score: ${score} / ${length}</p>
+            //<p>Your Score: ${score} / ${length}</p>
         `;
     }
 </script>
+
